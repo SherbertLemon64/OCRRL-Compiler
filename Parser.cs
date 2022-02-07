@@ -153,6 +153,7 @@ namespace OCRRFcompiler
 			return currExpr;
 		}
 		
+		
 		// statements
 		private ConditionalStatement CreateConditionalStatement()
 		{
@@ -181,9 +182,27 @@ namespace OCRRFcompiler
 
 		private AssignmentStatement CreateAssignmentStatement(VarToken _var)
 		{
-			return null;
+			AssignmentStatement returnValue = new AssignmentStatement();
+
+			ExpressionVariable variable = new ExpressionVariable();
+			variable.ValueName = _var.Value;
+			returnValue.Variable = variable;
+			
+			object assignment = TokenReader.Read();
+			if (assignment is AssignmentToken assignmentToken)
+			{
+				returnValue.Assignment = ParseExpression();
+			}
+			else
+			{
+				throw new UnexpectedTokenException(0, typeof(Expression), assignment.GetType());
+			}
+
+			returnValue.NextLine = ParseNextStatement(returnValue);
+			
+			return returnValue;
 		}
-		
+
 		private Statement ParseNextStatement(Statement _prev)
 		{
 			object currentToken = TokenReader.Read();

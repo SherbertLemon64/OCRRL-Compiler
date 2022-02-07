@@ -324,7 +324,11 @@ namespace OCRRFcompiler.Scanning
 
 	public enum Assignments
 	{
-		Equal
+		Equal,
+		AddEqual,
+		SubtractEqual,
+		TimesEqual,
+		DivEqual
 	}
 
 	public struct TabulationCharecter
