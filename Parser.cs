@@ -276,6 +276,18 @@ namespace OCRRFcompiler
 			}
 		}
 
+		public object ReadValueAsType(Type t)
+		{
+			object val = Read();
+			Type valType = val.GetType();
+			if (valType != t)
+			{
+				throw new UnexpectedTokenException(0,valType,t);
+			}
+
+			return val;
+		}
+		
 		public T SeekCurrent()
 		{
 			return values[index];
