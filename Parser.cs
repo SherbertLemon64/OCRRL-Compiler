@@ -13,7 +13,8 @@ namespace OCRRFcompiler
 		public string CompileLocation;
 
 		private Reader<object> TokenReader;
-		private Stack<ConditionalStatement> Scopes = new Stack<ConditionalStatement>();
+
+		public SyntaxTree Tree = new SyntaxTree();
 
 		public void Parse(string _path)
 		{
@@ -24,7 +25,12 @@ namespace OCRRFcompiler
 			
 			TokenReader = new Reader<object>(Scanning.Tokens.ToArray());
 
-			TopStatement = ParseNextStatement(null);
+			while (!TokenReader.IsEnd())
+			{
+				Statement newStatement = ParseNextStatement();
+				if (newStatement is not null)
+					Tree.AddStatement(newStatement);
+			}
 		}
 
 		private Expression ParseExpression()
@@ -159,26 +165,6 @@ namespace OCRRFcompiler
 		private ConditionalStatement CreateConditionalStatement()
 		{
 			ConditionalStatement statement = new ConditionalStatement {Check = ParseExpression()};
-			Scopes.Push(statement);
-			statement.NextLine = ParseNextStatement(statement);
-			return statement;
-		}
-
-		private LoopEndStatement CreateLoopEndStatement(Statement _prev)
-		{
-			LoopEndStatement statement = new LoopEndStatement();
-
-			while (_prev is not ConditionalStatement)
-			{
-				if (_prev.PrevLine is null) { throw new Exception("Closed Loop without loop start"); }
-
-				_prev = _prev.PrevLine;
-			}
-
-			ConditionalStatement lastConditional = (ConditionalStatement) _prev;
-			
-			statement.LoopStart = lastConditional;
-			lastConditional.FalseLine = ParseNextStatement(statement);
 			return statement;
 		}
 
@@ -200,18 +186,11 @@ namespace OCRRFcompiler
 				throw new UnexpectedTokenException(0, typeof(Expression), assignment.GetType());
 			}
 
-			returnValue.NextLine = ParseNextStatement(returnValue);
-			
 			return returnValue;
 		}
 
-		private Statement ParseNextStatement(Statement _prev)
+		private Statement ParseNextStatement()
 		{
-			if (TokenReader.IsEnd())
-			{
-				return null;
-			}
-			
 			object currentToken = TokenReader.Read();
 			
 			Statement _returnStatement = new Statement();
@@ -221,16 +200,41 @@ namespace OCRRFcompiler
 				IdentifierToken identifierToken = (IdentifierToken) currentToken;
 				switch (identifierToken.Value)
 				{
-					case (int)Identifiers.IF:
+					case (int) Identifiers.IF:
+					{
 						_returnStatement = CreateConditionalStatement();
 						break;
-					case (int)Identifiers.WHILE:
+					}
+					case (int) Identifiers.WHILE:
+					{
 						_returnStatement = CreateConditionalStatement();
 						break;
-					case (int)Identifiers.ENDSCOPE:
-						ConditionalStatement conditional = Scopes.Pop();
-						conditional.FalseLine = new ConditionalEndStatement();
-						conditional.FalseLine.NextLine = ParseNextStatement(conditional.FalseLine);
+					}
+					case (int) Identifiers.ENDSCOPE:
+					{
+						ConditionalEndStatement statement = new ConditionalEndStatement();
+						Tree.EndScope();
+						_returnStatement = statement;
+						break;
+					}
+					case (int) Identifiers.ENDWHILE:
+					{
+						LoopEndStatement statement = new LoopEndStatement();
+						Tree.EndScope();
+						_returnStatement = statement;
+						break;
+					}
+					case (int)Identifiers.NEXT:
+					{
+						ForLoopEndStatement statement = new ForLoopEndStatement();
+						Tree.EndScope();
+						_returnStatement = statement;
+						statement.Variable = (ExpressionVariable) ParseExpression();
+						break;
+					}
+					default:
+						// not implemented identifier or an EOL token
+						return null;
 						break;
 				}
 			}
@@ -238,11 +242,11 @@ namespace OCRRFcompiler
 			{
 				_returnStatement = CreateAssignmentStatement(var);
 			}
-			else if (currentToken is not AssignmentToken && currentToken is not IdentifierToken)
+			else
 			{
+				return null;
 			}
 			
-			_returnStatement.PrevLine = _prev;
 			return _returnStatement;
 		}
 		
@@ -311,11 +315,47 @@ namespace OCRRFcompiler
 			return values[index];
 		}
 	}
+
+	public class SyntaxTree
+	{
+		public Scope GlobalScope = new Scope(null);
+
+		private Scope CurrentScope;
+
+		public SyntaxTree()
+		{
+			CurrentScope = GlobalScope;
+		}
+	
+		public void AddStatement(Statement _toAdd)
+		{
+			CurrentScope.Statements.Add(_toAdd);
+			if (_toAdd is ConditionalStatement conditionalStatement)
+			{
+				conditionalStatement.ConditionalScope = new Scope(CurrentScope);
+				CurrentScope = conditionalStatement.ConditionalScope;
+			}
+		}
+
+		public void EndScope()
+		{
+			CurrentScope = CurrentScope.Parent;
+		}
+	}
+
+	public class Scope
+	{
+		public Scope Parent;
+		public List<Statement> Statements = new List<Statement>();
+
+		public Scope(Scope _parent)
+		{
+			Parent = _parent;
+		}
+	}
 	
 	public class Statement
 	{
-		public Statement PrevLine;
-		public Statement NextLine;
 	}
 
 	public class Expression
@@ -372,14 +412,18 @@ namespace OCRRFcompiler
 	public class ConditionalStatement : Statement
 	{
 		public Expression Check;
-		
-		public Statement FalseLine;
+		public Scope ConditionalScope;
 	}
 
 	public class ConditionalEndStatement : Statement { }
 	public class LoopEndStatement : ConditionalEndStatement
 	{
 		public ConditionalStatement LoopStart;
+	}
+
+	public class ForLoopEndStatement : LoopEndStatement
+	{
+		public ExpressionVariable Variable;
 	}
 
 	public class AssignmentStatement : Statement

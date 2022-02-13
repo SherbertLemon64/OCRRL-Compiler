@@ -60,6 +60,11 @@ namespace OCRRFcompiler.Scanning
 								ReadComparason(Comparasons.LessThan);
 							}
 							break;
+						case '\n':
+							IdentifierToken token = new IdentifierToken();
+							token.Value = (int)Identifiers.ENDOFLINE;
+							Tokens.Add(token);
+							break;
 					}
 				} 
 			}
@@ -80,7 +85,7 @@ namespace OCRRFcompiler.Scanning
 
 			while (true)
 			{
-				_currenVal = (char)_reader.Read();
+				_currenVal = (char)_reader.Peek();
 				bool broken = _currenVal == char.MaxValue; // check if end is hit
 
 				foreach (char _endChar in _endChars)
@@ -95,7 +100,8 @@ namespace OCRRFcompiler.Scanning
 				{
 					break;
 				}
-				
+
+				_reader.Read();
 				var.Append(_currenVal);
 			}
 			
@@ -216,7 +222,7 @@ namespace OCRRFcompiler.Scanning
 			{"do",8},
 			{"until",9},
 			{"while",10},
-			{"endwhile",5},
+			{"endwhile",22},
 			{"for",11},
 			{"to",12},
 			{"next",13},
@@ -258,7 +264,9 @@ namespace OCRRFcompiler.Scanning
 		FUNCTION,
 		RETURN,
 		DIV,
-		MOD
+		MOD,
+		ENDWHILE,
+		ENDOFLINE
 	}
 	
 	public struct StringLiteralToken
