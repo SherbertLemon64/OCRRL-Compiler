@@ -13,6 +13,7 @@ namespace OCRRFcompiler
 		public string CompileLocation;
 
 		private Reader<object> TokenReader;
+		private Stack<ConditionalStatement> Scopes = new Stack<ConditionalStatement>();
 
 		public void Parse(string _path)
 		{
@@ -158,6 +159,7 @@ namespace OCRRFcompiler
 		private ConditionalStatement CreateConditionalStatement()
 		{
 			ConditionalStatement statement = new ConditionalStatement {Check = ParseExpression()};
+			Scopes.Push(statement);
 			statement.NextLine = ParseNextStatement(statement);
 			return statement;
 		}
@@ -205,6 +207,11 @@ namespace OCRRFcompiler
 
 		private Statement ParseNextStatement(Statement _prev)
 		{
+			if (TokenReader.IsEnd())
+			{
+				return null;
+			}
+			
 			object currentToken = TokenReader.Read();
 			
 			Statement _returnStatement = new Statement();
@@ -219,6 +226,11 @@ namespace OCRRFcompiler
 						break;
 					case (int)Identifiers.WHILE:
 						_returnStatement = CreateConditionalStatement();
+						break;
+					case (int)Identifiers.ENDSCOPE:
+						ConditionalStatement conditional = Scopes.Pop();
+						conditional.FalseLine = new ConditionalEndStatement();
+						conditional.FalseLine.NextLine = ParseNextStatement(conditional.FalseLine);
 						break;
 				}
 			}
@@ -252,6 +264,12 @@ namespace OCRRFcompiler
 			values = _values;
 			index = _index;
 		}
+
+		public bool IsEnd()
+		{
+			return values.Length == index + 1;
+		}
+		
 		public T Read()
 		{
 			T val = values[index];
@@ -358,7 +376,8 @@ namespace OCRRFcompiler
 		public Statement FalseLine;
 	}
 
-	public class LoopEndStatement : Statement
+	public class ConditionalEndStatement : Statement { }
+	public class LoopEndStatement : ConditionalEndStatement
 	{
 		public ConditionalStatement LoopStart;
 	}

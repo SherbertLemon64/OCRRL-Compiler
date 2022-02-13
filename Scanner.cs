@@ -60,24 +60,6 @@ namespace OCRRFcompiler.Scanning
 								ReadComparason(Comparasons.LessThan);
 							}
 							break;
-						case '\n':
-							if (_reader.Peek() == '	')
-							{
-								if (indented == -1)
-								{
-									indented = Tokens.Count;
-									TabulationCharecter tab = new TabulationCharecter();
-									tab.TabulationEnding = -1;
-									Tokens.Add(tab);
-								}
-							}
-							else if (indented > -1)
-							{
-								TabulationCharecter tabulationCharecter = (TabulationCharecter)Tokens[indented];
-								tabulationCharecter.TabulationEnding = Tokens.Count;
-								Tokens[indented] = tabulationCharecter;
-							}
-							break;
 					}
 				} 
 			}
@@ -190,8 +172,7 @@ namespace OCRRFcompiler.Scanning
 		{
 			string _fullValue = ReadUntilChars(_reader, _currenVal, new []{' ', '=', '!', '<', '>', '\n','\r'});
 			// check if or which value it is in the identifiers
-			int _index = Array.IndexOf(IdentifierToken.Identifiers, _fullValue);
-			if (_index != -1)
+			if (IdentifierToken.Identifiers.TryGetValue(_fullValue, out int _index))
 			{
 				// if _index is an AND OR NOT operator
 				if (_index == 0 || _index == 1 || _index == 2)
@@ -222,33 +203,33 @@ namespace OCRRFcompiler.Scanning
 
 	public struct IdentifierToken
 	{
-		public static readonly  string[] Identifiers = new[]
+		public static readonly  Dictionary<string,int> Identifiers = new Dictionary<string, int>()
 		{
-			"AND",
-			"OR",
-			"NOT",
-			"if",
-			"then",
-			"endif",
-			"switch",
-			"case",
-			"do",
-			"until",
-			"while",
-			"endwhile",
-			"for",
-			"to",
-			"next",
-			"step",
-			"const",
-			"global",
-			"procedure",
-			"endprocedure",
-			"function",
-			"return",
-			"endfunction",
-			"DIV",
-			"MOD"
+			{"AND", 0},
+			{"OR",1},
+			{"NOT",2},
+			{"if",3},
+			{"then",4},
+			{"endif",5},
+			{"switch",6},
+			{"case",7},
+			{"do",8},
+			{"until",9},
+			{"while",10},
+			{"endwhile",5},
+			{"for",11},
+			{"to",12},
+			{"next",13},
+			{"step",14},
+			{"const",15},
+			{"global",16},
+			{"procedure",17},
+			{"endprocedure",5},
+			{"function",18},
+			{"return",19},
+			{"endfunction",5},
+			{"DIV",20},
+			{"MOD",21}
 		};
 
 		public int Value;
@@ -261,13 +242,12 @@ namespace OCRRFcompiler.Scanning
 		NOT,
 		IF,
 		THEN,
-		ENDIF,
+		ENDSCOPE,
 		SWITCH,
 		CASE,
 		DO,
 		UNTIL,
 		WHILE,
-		ENDWHILE,
 		FOR,
 		TO,
 		NEXT,
@@ -275,10 +255,8 @@ namespace OCRRFcompiler.Scanning
 		CONST,
 		GLOBAL,
 		PROCEDURE,
-		ENDPROCEDURE,
 		FUNCTION,
 		RETURN,
-		ENDFUNCTION,
 		DIV,
 		MOD
 	}
@@ -329,10 +307,5 @@ namespace OCRRFcompiler.Scanning
 		SubtractEqual,
 		TimesEqual,
 		DivEqual
-	}
-
-	public struct TabulationCharecter
-	{
-		public int TabulationEnding;
 	}
 }

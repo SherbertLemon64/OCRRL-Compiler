@@ -13,7 +13,7 @@ namespace OCRRFcompiler.Testing
 		}
 
 		[Test]
-		public void Test1()
+		public void TestParser()
 		{
 			Parser parser = new Parser();
 			parser.Parse(Directory.GetCurrentDirectory() + @"\Test.rl");
