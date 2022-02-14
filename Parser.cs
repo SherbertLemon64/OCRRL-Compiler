@@ -196,6 +196,33 @@ namespace OCRRFcompiler
 			return returnValue;
 		}
 
+		private ForLoopStatement ParseForLoop()
+		{
+			ForLoopStatement returnValue = new ForLoopStatement();
+			AssignmentStatement assignmentStatement = CreateAssignmentStatement((VarToken) TokenReader.ReadValueAsType(typeof(VarToken)));
+
+			returnValue.Assignment = assignmentStatement;
+			
+			TokenReader.Read(); // chuck the to
+			
+			ExpressionLiteral<int> max = (ExpressionLiteral<int>) ParseExpression();
+
+			returnValue.Check = new BinaryExpression()
+			{
+				LeftValue = returnValue.Assignment.Variable, 
+				RightValue = max,
+				Comparason = new ExpressionComparason(Comparasons.LessThan)
+			};
+
+			TokenReader.Read(); // chuck the step
+
+			ExpressionLiteral<int> step = (ExpressionLiteral<int>) ParseExpression();
+
+			returnValue.Step = step.Value;
+
+			return returnValue;
+		}
+		
 		private Statement ParseNextStatement()
 		{
 			object currentToken = TokenReader.Read();
@@ -239,6 +266,11 @@ namespace OCRRFcompiler
 						statement.Variable = (ExpressionVariable) ParseExpression();
 						break;
 					}
+					case (int) Identifiers.FOR:
+					{
+						_returnStatement = ParseForLoop();
+						break;
+					}
 					default:
 						// not implemented identifier or an EOL token
 						return null;
@@ -278,7 +310,7 @@ namespace OCRRFcompiler
 
 		public bool IsEnd()
 		{
-			return values.Length == index + 1;
+			return values.Length <= index + 1;
 		}
 		
 		public T Read()
@@ -433,6 +465,12 @@ namespace OCRRFcompiler
 		public ExpressionVariable Variable;
 	}
 
+	public class ForLoopStatement : ConditionalStatement
+	{
+		public AssignmentStatement Assignment;
+		public int Step;
+	}
+	
 	public class AssignmentStatement : Statement
 	{
 		public ExpressionVariable Variable;

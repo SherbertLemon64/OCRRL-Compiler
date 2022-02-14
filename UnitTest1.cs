@@ -27,7 +27,7 @@ namespace OCRRFcompiler.Testing
 			string forLoop = 
 				@"
 				y = 0
-				for x=0 to 100
+				for x=0 to 100 step 2
 					y = 2
 				next x";
 			parser.Parse(forLoop);
