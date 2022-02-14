@@ -65,6 +65,20 @@ namespace OCRRFcompiler.Scanning
 							token.Value = (int)Identifiers.ENDOFLINE;
 							Tokens.Add(token);
 							break;
+						case '(':
+						{
+							Parenthesis bracket = new Parenthesis();
+							bracket.Open = true;
+							Tokens.Add(bracket);
+							break;
+						}
+						case ')':
+						{
+							Parenthesis bracket = new Parenthesis();
+							bracket.Open = false;
+							Tokens.Add(bracket);
+							break;
+						}
 					}
 				} 
 			}
@@ -73,7 +87,7 @@ namespace OCRRFcompiler.Scanning
 		public void ReadVar(TextReader _reader, char _currenVal)
 		{
 			VarToken _token = new VarToken();
-			_token.Value = ReadUntilChars(_reader, _currenVal, new []{' ', '=', '!', '<', '>', '\r', '\n'});
+			_token.Value = ReadUntilChars(_reader, _currenVal, new []{' ', '=', '!', '<', '>', '\r', '\n','(',')'});
 			Tokens.Add(_token);
 		}
 
@@ -315,5 +329,10 @@ namespace OCRRFcompiler.Scanning
 		SubtractEqual,
 		TimesEqual,
 		DivEqual
+	}
+
+	public struct Parenthesis
+	{
+		public bool Open;
 	}
 }
