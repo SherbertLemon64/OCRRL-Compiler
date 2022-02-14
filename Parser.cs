@@ -14,12 +14,19 @@ namespace OCRRFcompiler
 
 		private Reader<object> TokenReader;
 
-		public SyntaxTree Tree = new SyntaxTree();
+		public SyntaxTree Tree;
 
-		public void Parse(string _path)
+		public void ParseLocation(string _path)
 		{
 			string text = File.ReadAllText(_path);
-			TextReader read = new StringReader(text);
+			Parse(text);
+		}
+
+		public void Parse(string _data)
+		{
+			Tree = new SyntaxTree();
+
+			TextReader read = new StringReader(_data);
 			Scanning = new Scanner();
 			Scanning.Scan(read);
 			
@@ -32,7 +39,7 @@ namespace OCRRFcompiler
 					Tree.AddStatement(newStatement);
 			}
 		}
-
+		
 		private Expression ParseExpression()
 		{
 			Expression _returnExpr;

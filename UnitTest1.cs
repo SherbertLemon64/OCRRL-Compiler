@@ -7,6 +7,7 @@ namespace OCRRFcompiler.Testing
 {
 	public class Tests
 	{
+		private Parser parser = new Parser();
 		[SetUp]
 		public void Setup()
 		{
@@ -15,10 +16,33 @@ namespace OCRRFcompiler.Testing
 		[Test]
 		public void TestParser()
 		{
-			Parser parser = new Parser();
-			parser.Parse(Directory.GetCurrentDirectory() + @"\Test.rl");
+			parser.ParseLocation(Directory.GetCurrentDirectory() + @"\Test.rl");
 
 			Assert.Pass();
+		}
+
+		[Test]
+		public void TestForLoop()
+		{
+			string forLoop = 
+				@"
+				y = 0
+				for x=0 to 100
+					y = 2
+				next x";
+			parser.Parse(forLoop);
+		}
+
+		[Test]
+		public void TestWhileLoop()
+		{
+			string whileLoop = 
+				@"
+				y = 0
+				while y<10 
+					y = 11
+				endwhile";
+			parser.Parse(whileLoop);
 		}
 
 		[Test]
