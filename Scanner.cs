@@ -36,35 +36,37 @@ namespace OCRRFcompiler.Scanning
 							ReadAssignment(_reader);
 							break;
 						case '!':
-							ReadComparason(Comparasons.NotEqual);
+							ReadComparason(Operators.NotEqual);
 							break;
 						case '>':
 							if (_reader.Peek() == '=')
 							{
-								ReadComparason(Comparasons.GreaterThanOrEqual);
+								ReadComparason(Operators.GreaterThanOrEqual);
 								_reader.Read();
 							}
 							else
 							{
-								ReadComparason(Comparasons.GreaterThan);
+								ReadComparason(Operators.GreaterThan);
 							}
 							break;
 						case '<':
 							if (_reader.Peek() == '=')
 							{
-								ReadComparason(Comparasons.LessThanOrEqual);
+								ReadComparason(Operators.LessThanOrEqual);
 								_reader.Read();
 							}
 							else
 							{
-								ReadComparason(Comparasons.LessThan);
+								ReadComparason(Operators.LessThan);
 							}
 							break;
 						case '\n':
+						{
 							IdentifierToken token = new IdentifierToken();
-							token.Value = (int)Identifiers.ENDOFLINE;
+							token.Value = (int) Identifiers.ENDOFLINE;
 							Tokens.Add(token);
 							break;
+						}
 						case '(':
 						{
 							Parenthesis bracket = new Parenthesis();
@@ -79,6 +81,34 @@ namespace OCRRFcompiler.Scanning
 							Tokens.Add(bracket);
 							break;
 						}
+						case '+':
+						{
+							OperatorToken token = new OperatorToken();
+							token.OperatorType = Operators.PLUS;
+							Tokens.Add(token);
+							break;
+						}
+						case '-':
+						{
+							OperatorToken token = new OperatorToken();
+							token.OperatorType = Operators.SUBTRACT;
+							Tokens.Add(token);
+							break;
+						}
+						case '*':
+						{
+							OperatorToken token = new OperatorToken();
+							token.OperatorType = Operators.MULTIPLY;
+							Tokens.Add(token);
+							break;
+						}
+						case '/':
+						{
+							OperatorToken token = new OperatorToken();
+							token.OperatorType = Operators.DIVISION;
+							Tokens.Add(token);
+							break;
+						}
 					}
 				} 
 			}
@@ -87,7 +117,7 @@ namespace OCRRFcompiler.Scanning
 		public void ReadVar(TextReader _reader, char _currenVal)
 		{
 			VarToken _token = new VarToken();
-			_token.Value = ReadUntilChars(_reader, _currenVal, new []{' ', '=', '!', '<', '>', '\r', '\n','(',')'});
+			_token.Value = ReadUntilChars(_reader, _currenVal, new []{' ', '=', '!', '<', '>', '\r', '\n','(',')','+','-','*','/'});
 			Tokens.Add(_token);
 		}
 
@@ -169,9 +199,9 @@ namespace OCRRFcompiler.Scanning
 		{
 			if ((char) _reader.Peek() == '=')
 			{
-				ComparasonToken comparasonToken = new ComparasonToken();
-				comparasonToken.ComparasonType = Comparasons.Equal;
-				Tokens.Add(comparasonToken);
+				OperatorToken operatorToken = new OperatorToken();
+				operatorToken.OperatorType = Operators.Equal;
+				Tokens.Add(operatorToken);
 			}
 			else
 			{
@@ -181,10 +211,10 @@ namespace OCRRFcompiler.Scanning
 			}
 		}
 
-		public void ReadComparason(Comparasons _comparason)
+		public void ReadComparason(Operators _operator)
 		{
-			ComparasonToken _token = new ComparasonToken();
-			_token.ComparasonType = _comparason;
+			OperatorToken _token = new OperatorToken();
+			_token.OperatorType = _operator;
 			Tokens.Add(_token);
 		}
 
@@ -197,9 +227,9 @@ namespace OCRRFcompiler.Scanning
 				// if _index is an AND OR NOT operator
 				if (_index == 0 || _index == 1 || _index == 2)
 				{
-					ComparasonToken _token = new ComparasonToken();
+					OperatorToken _token = new OperatorToken();
 					// offset to convert to the comparasons
-					_token.ComparasonType = (Comparasons)(6 + _index);
+					_token.OperatorType = (Operators)(6 + _index);
 				
 					Tokens.Add(_token);
 				}
@@ -292,12 +322,12 @@ namespace OCRRFcompiler.Scanning
 	{
 		public int Value;
 	}
-	public struct ComparasonToken
+	public struct OperatorToken
 	{
-		public Comparasons ComparasonType;
+		public Operators OperatorType;
 	}
 
-	public enum Comparasons
+	public enum Operators
 	{
 		Equal,
 		NotEqual,
@@ -307,7 +337,11 @@ namespace OCRRFcompiler.Scanning
 		GreaterThanOrEqual,
 		AND,
 		OR,
-		NOT
+		NOT,
+		MULTIPLY,
+		DIVISION,
+		PLUS,
+		SUBTRACT,
 	}
 	
 	

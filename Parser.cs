@@ -46,7 +46,7 @@ namespace OCRRFcompiler
 		{
 			Expression _returnExpr;
 			
-			if (TokenReader.Seek() is ComparasonToken)
+			if (TokenReader.Seek() is OperatorToken)
 			{
 				_returnExpr = ParseBinaryExpression();
 			}
@@ -86,10 +86,10 @@ namespace OCRRFcompiler
 
 				_derived.ValueName = _token.Value;
 				_returnVal = _derived;
-			} else if (_currVal is ComparasonToken)
+			} else if (_currVal is OperatorToken)
 			{
-				ComparasonToken _token = (ComparasonToken) _currVal;
-				ExpressionComparason _derived = new ExpressionComparason(_token.ComparasonType);
+				OperatorToken _token = (OperatorToken) _currVal;
+				ExpressionComparason _derived = new ExpressionComparason(_token.OperatorType);
 
 				_returnVal = _derived;
 			}
@@ -158,13 +158,13 @@ namespace OCRRFcompiler
 
 		private Expression ParseSingleBinaryExpression()
 		{
-			if (TokenReader.Seek() is not ComparasonToken) { return ParseExpression(true);}
+			if (TokenReader.Seek() is not OperatorToken) { return ParseExpression(true);}
 			
 			BinaryExpression currExpr = new BinaryExpression();
 
 			currExpr.LeftValue = ParseExpression(true);
-			ComparasonToken token = (ComparasonToken) TokenReader.Read();
-			currExpr.Comparason = new ExpressionComparason(token.ComparasonType);
+			OperatorToken token = (OperatorToken) TokenReader.Read();
+			currExpr.Comparason = new ExpressionComparason(token.OperatorType);
 			currExpr.RightValue = ParseExpression(true);
 			return currExpr;
 		}
@@ -213,7 +213,7 @@ namespace OCRRFcompiler
 			{
 				LeftValue = returnValue.Assignment.Variable, 
 				RightValue = max,
-				Comparason = new ExpressionComparason(Comparasons.LessThan)
+				Comparason = new ExpressionComparason(Operators.LessThan)
 			};
 
 			TokenReader.Read(); // chuck the step
@@ -312,7 +312,7 @@ namespace OCRRFcompiler
 
 		public bool IsEnd()
 		{
-			return values.Length <= index + 1;
+			return values.Length < index + 1;
 		}
 		
 		public T Read()

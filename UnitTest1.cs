@@ -40,7 +40,7 @@ namespace OCRRFcompiler.Testing
 				@"
 				y = 0
 				while y<10 
-					y = 11
+					y = y + 1
 				endwhile";
 			parser.Parse(whileLoop);
 		}

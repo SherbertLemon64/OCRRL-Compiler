@@ -15,25 +15,29 @@ namespace OCRRFcompiler.Expressions
 
 	public class ExpressionComparason : Expression
 	{
-		public Comparasons Comparason;
+		public Operators Operator;
 		public int Precedence;
 		
 		private static readonly int[] ComparasonsPrecedence = new[]
 		{
-			1,
-			1,
-			1,
-			1,
-			1,
-			1,
+			3,
+			3,
+			3,
+			3,
+			3,
+			3,
+			5,
+			4,
 			3,
 			2,
-			1
+			1,
+			0,
+			-1
 		};
-		public ExpressionComparason(Comparasons _comparason)
+		public ExpressionComparason(Operators _operator)
 		{
-			Comparason = _comparason;
-			Precedence = ComparasonsPrecedence[(int) _comparason];
+			Operator = _operator;
+			Precedence = ComparasonsPrecedence[(int) _operator];
 		}
 	}
 	public class ExpressionLiteral<T> : Expression
