@@ -3,20 +3,23 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Transactions;
+using OCRRFcompiler.Tokens;
 
 namespace OCRRFcompiler.Scanning
 {
 	public class Scanner
 	{
 		public List<object> Tokens = new List<object>();
-		
+
 		public void Scan(TextReader _reader)
 		{
 			int indented = -1;
 			while (_reader.Peek() != -1)
 			{
-				char c = (char)_reader.Read();
-				if (c == ' ') { }
+				char c = (char) _reader.Read();
+				if (c == ' ')
+				{
+				}
 				else if (char.IsDigit(c))
 				{
 					ReadIntegerLiteral(_reader, c);
@@ -48,6 +51,7 @@ namespace OCRRFcompiler.Scanning
 							{
 								ReadComparason(Operators.GreaterThan);
 							}
+
 							break;
 						case '<':
 							if (_reader.Peek() == '=')
@@ -59,65 +63,38 @@ namespace OCRRFcompiler.Scanning
 							{
 								ReadComparason(Operators.LessThan);
 							}
+
 							break;
 						case '\n':
 						{
-							IdentifierToken token = new IdentifierToken();
-							token.Value = (int) Identifiers.ENDOFLINE;
+							NullToken token = new NullToken();
 							Tokens.Add(token);
 							break;
 						}
 						case '(':
 						{
-							Parenthesis bracket = new Parenthesis();
+							ParenthesisToken bracket = new ParenthesisToken();
 							bracket.Open = true;
 							Tokens.Add(bracket);
 							break;
 						}
 						case ')':
 						{
-							Parenthesis bracket = new Parenthesis();
+							ParenthesisToken bracket = new ParenthesisToken();
 							bracket.Open = false;
 							Tokens.Add(bracket);
 							break;
 						}
-						case '+':
-						{
-							OperatorToken token = new OperatorToken();
-							token.OperatorType = Operators.PLUS;
-							Tokens.Add(token);
-							break;
-						}
-						case '-':
-						{
-							OperatorToken token = new OperatorToken();
-							token.OperatorType = Operators.SUBTRACT;
-							Tokens.Add(token);
-							break;
-						}
-						case '*':
-						{
-							OperatorToken token = new OperatorToken();
-							token.OperatorType = Operators.MULTIPLY;
-							Tokens.Add(token);
-							break;
-						}
-						case '/':
-						{
-							OperatorToken token = new OperatorToken();
-							token.OperatorType = Operators.DIVISION;
-							Tokens.Add(token);
-							break;
-						}
 					}
-				} 
+				}
 			}
 		}
 
 		public void ReadVar(TextReader _reader, char _currenVal)
 		{
 			VarToken _token = new VarToken();
-			_token.Value = ReadUntilChars(_reader, _currenVal, new []{' ', '=', '!', '<', '>', '\r', '\n','(',')','+','-','*','/'});
+			_token.Value = ReadUntilChars(_reader, _currenVal,
+				new[] {' ', '=', '!', '<', '>', '\r', '\n', '(', ')', '+', '-', '*', '/'});
 			Tokens.Add(_token);
 		}
 
@@ -129,7 +106,7 @@ namespace OCRRFcompiler.Scanning
 
 			while (true)
 			{
-				_currenVal = (char)_reader.Peek();
+				_currenVal = (char) _reader.Peek();
 				bool broken = _currenVal == char.MaxValue; // check if end is hit
 
 				foreach (char _endChar in _endChars)
@@ -140,6 +117,7 @@ namespace OCRRFcompiler.Scanning
 						break;
 					}
 				}
+
 				if (broken)
 				{
 					break;
@@ -148,10 +126,10 @@ namespace OCRRFcompiler.Scanning
 				_reader.Read();
 				var.Append(_currenVal);
 			}
-			
+
 			return var.ToString();
 		}
-		
+
 		public string ReadUntilChar(TextReader _reader, char _currenVal, char _endChars)
 		{
 			StringBuilder var = new StringBuilder();
@@ -160,16 +138,16 @@ namespace OCRRFcompiler.Scanning
 
 			while (true)
 			{
-				_currenVal = (char)_reader.Read();
+				_currenVal = (char) _reader.Read();
 
 				if (_currenVal == _endChars)
 				{
 					break;
 				}
-				
+
 				var.Append(_currenVal);
 			}
-			
+
 			return var.ToString();
 		}
 
@@ -182,19 +160,20 @@ namespace OCRRFcompiler.Scanning
 				_integer.Append(_currentValue);
 				_currentValue = (char) _reader.Read();
 			}
+
 			IntegerLiteralToken _integerToken = new IntegerLiteralToken();
 			_integerToken.Value = Int32.Parse(_integer.ToString());
 			Tokens.Add(_integerToken);
 		}
-		
+
 		public void ReadStringLiteral(TextReader _reader)
 		{
 			StringLiteralToken _str = new StringLiteralToken();
 			_str.Value = ReadUntilChar(_reader, '\0', '"');
-			
+
 			Tokens.Add(_str);
 		}
-		
+
 		public void ReadAssignment(TextReader _reader)
 		{
 			if ((char) _reader.Peek() == '=')
@@ -220,69 +199,72 @@ namespace OCRRFcompiler.Scanning
 
 		public void ReadTextBlock(TextReader _reader, char _currenVal)
 		{
-			string _fullValue = ReadUntilChars(_reader, _currenVal, new []{' ', '=', '!', '<', '>', '\n','\r'});
+			string _fullValue = ReadUntilChars(_reader, _currenVal, new[] {' ', '=', '!', '<', '>', '\n', '\r'});
 			// check if or which value it is in the identifiers
-			if (IdentifierToken.Identifiers.TryGetValue(_fullValue, out int _index))
+
+			if (IdentifiersMap.TryGetValue(_fullValue, out Type _type))
 			{
-				// if _index is an AND OR NOT operator
-				if (_index == 0 || _index == 1 || _index == 2)
-				{
-					OperatorToken _token = new OperatorToken();
-					// offset to convert to the comparasons
-					_token.OperatorType = (Operators)(6 + _index);
-				
-					Tokens.Add(_token);
-				}
-				else
-				{
-					IdentifierToken _token = new IdentifierToken();
-					_token.Value = _index;
-				
-					Tokens.Add(_token);
-				}
+				Identifier _token = (Identifier) Activator.CreateInstance(_type);
+
+				Tokens.Add(_token);
+			} else if (OperatorsMap.TryGetValue(_fullValue, out Operators value))
+			{
+				OperatorToken token = new OperatorToken();
+				token.OperatorType = value;
+
+				Tokens.Add(token);
 			}
 			else
 			{
 				VarToken _token = new VarToken();
 				_token.Value = _fullValue;
-				
+
 				Tokens.Add(_token);
 			}
 		}
-	}
 
-	public struct IdentifierToken
-	{
-		public static readonly  Dictionary<string,int> Identifiers = new Dictionary<string, int>()
+		public static readonly Dictionary<string, Type> IdentifiersMap = new Dictionary<string, Type>()
 		{
-			{"AND", 0},
-			{"OR",1},
-			{"NOT",2},
-			{"if",3},
-			{"then",4},
-			{"endif",5},
-			{"switch",6},
-			{"case",7},
-			{"do",8},
-			{"until",9},
-			{"while",10},
-			{"endwhile",22},
-			{"for",11},
-			{"to",12},
-			{"next",13},
-			{"step",14},
-			{"const",15},
-			{"global",16},
-			{"procedure",17},
-			{"endprocedure",5},
-			{"function",18},
-			{"return",19},
-			{"endfunction",5},
-			{"DIV",20},
-			{"MOD",21}
+			{"if", typeof(IfToken)},
+			{"then", typeof(NextToken)},
+			{"endif", typeof(EndScopeToken)},
+			{"switch", null},
+			{"case", null},
+			{"do", null},
+			{"until", null},
+			{"while", typeof(WhileToken)},
+			{"endwhile", typeof(EndWhileToken)},
+			{"for", typeof(ForToken)},
+			{"to", typeof(NextToken)},
+			{"next", typeof(NextToken)},
+			{"step", typeof(NextToken)},
+			{"const", null},
+			{"global", null},
+			{"procedure", null},
+			{"endprocedure", null},
+			{"function", null},
+			{"return", null},
+			{"endfunction", null},
+			{"DIV", null},
+			{"MOD", null}
 		};
 
-		public int Value;
+		public static readonly Dictionary<string, Operators> OperatorsMap = new Dictionary<string, Operators>()
+		{
+			{"AND", Operators.AND},
+			{"OR", Operators.OR},
+			{"NOT", Operators.NOT},
+			{"+", Operators.PLUS},
+			{"-", Operators.SUBTRACT},
+			{"*", Operators.MULTIPLY},
+			{"/", Operators.DIVISION},
+			{"==", Operators.Equal},
+			{"!=", Operators.NotEqual},
+			{"<", Operators.LessThan},
+			{"<=", Operators.LessThanOrEqual},
+			{">", Operators.GreaterThan},
+			{">=", Operators.GreaterThanOrEqual},
+		};
 	}
 
 	public enum Identifiers
@@ -365,7 +347,7 @@ namespace OCRRFcompiler.Scanning
 		DivEqual
 	}
 
-	public struct Parenthesis
+	public struct ParenthesisToken
 	{
 		public bool Open;
 	}

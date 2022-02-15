@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using NUnit.Framework;
+using OCRRFcompiler.Parsing;
 using OCRRFcompiler.Scanning;
 
 namespace OCRRFcompiler.Testing
@@ -39,7 +40,7 @@ namespace OCRRFcompiler.Testing
 			string whileLoop = 
 				@"
 				y = 0
-				while y<10 
+				while y<10 AND y > 5
 					y = y + 1
 				endwhile";
 			parser.Parse(whileLoop);

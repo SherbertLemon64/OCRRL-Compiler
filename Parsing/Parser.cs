@@ -5,8 +5,9 @@ using OCRRFcompiler.Errors;
 using OCRRFcompiler.Scanning;
 using OCRRFcompiler.Expressions;
 using OCRRFcompiler.Statements;
+using OCRRFcompiler.Tokens;
 
-namespace OCRRFcompiler
+namespace OCRRFcompiler.Parsing
 {
 	public class Parser
 	{
@@ -171,7 +172,7 @@ namespace OCRRFcompiler
 		
 		
 		// statements
-		private ConditionalStatement CreateConditionalStatement()
+		public ConditionalStatement ParseConditionalStatement()
 		{
 			ConditionalStatement statement = new ConditionalStatement {Check = ParseExpression()};
 			return statement;
@@ -198,7 +199,7 @@ namespace OCRRFcompiler
 			return returnValue;
 		}
 
-		private ForLoopStatement ParseForLoop()
+		public ForLoopStatement ParseForLoop()
 		{
 			ForLoopStatement returnValue = new ForLoopStatement();
 			AssignmentStatement assignmentStatement = CreateAssignmentStatement((VarToken) TokenReader.ReadValueAsType(typeof(VarToken)));
@@ -224,6 +225,28 @@ namespace OCRRFcompiler
 
 			return returnValue;
 		}
+
+		public ConditionalEndStatement ParseConditionalEndStatement()
+		{
+			ConditionalEndStatement statement = new ConditionalEndStatement();
+			Tree.EndScope();
+			return statement;
+		}
+
+		public LoopEndStatement ParseLoopEndStatement()
+		{
+			LoopEndStatement statement = new LoopEndStatement();
+			Tree.EndScope();
+			return statement;
+		}
+
+		public ForLoopEndStatement ParseForLoopEndStatement()
+		{
+			ForLoopEndStatement statement = new ForLoopEndStatement();
+			Tree.EndScope();
+			statement.Variable = (ExpressionVariable) ParseExpression();
+			return statement;
+		}
 		
 		private Statement ParseNextStatement()
 		{
@@ -231,53 +254,9 @@ namespace OCRRFcompiler
 			
 			Statement _returnStatement = new Statement();
 
-			if (currentToken is IdentifierToken)
+			if (currentToken is Identifier identifier)
 			{
-				IdentifierToken identifierToken = (IdentifierToken) currentToken;
-				switch (identifierToken.Value)
-				{
-					case (int) Identifiers.IF:
-					{
-						_returnStatement = CreateConditionalStatement();
-						break;
-					}
-					case (int) Identifiers.WHILE:
-					{
-						_returnStatement = CreateConditionalStatement();
-						break;
-					}
-					case (int) Identifiers.ENDSCOPE:
-					{
-						ConditionalEndStatement statement = new ConditionalEndStatement();
-						Tree.EndScope();
-						_returnStatement = statement;
-						break;
-					}
-					case (int) Identifiers.ENDWHILE:
-					{
-						LoopEndStatement statement = new LoopEndStatement();
-						Tree.EndScope();
-						_returnStatement = statement;
-						break;
-					}
-					case (int)Identifiers.NEXT:
-					{
-						ForLoopEndStatement statement = new ForLoopEndStatement();
-						Tree.EndScope();
-						_returnStatement = statement;
-						statement.Variable = (ExpressionVariable) ParseExpression();
-						break;
-					}
-					case (int) Identifiers.FOR:
-					{
-						_returnStatement = ParseForLoop();
-						break;
-					}
-					default:
-						// not implemented identifier or an EOL token
-						return null;
-						break;
-				}
+				_returnStatement = identifier.ParseStatement(this);
 			}
 			else if (currentToken is VarToken var)
 			{
@@ -289,109 +268,6 @@ namespace OCRRFcompiler
 			}
 			
 			return _returnStatement;
-		}
-		
-		
-	}
-
-	public class Reader<T>
-	{
-		private T[] values;
-		public int index;
-
-		public Reader(T[] _values)
-		{
-			values = _values;
-		}
-
-		public Reader(T[] _values, int _index)
-		{
-			values = _values;
-			index = _index;
-		}
-
-		public bool IsEnd()
-		{
-			return values.Length < index + 1;
-		}
-		
-		public T Read()
-		{
-			T val = values[index];
-			index++;
-			return val;
-		}
-
-		public T Seek()
-		{
-			return Seek(1);
-		}
-
-		public T Seek(int _distance)
-		{
-			try
-			{
-				return values[index + _distance];
-			}
-			catch
-			{
-				return default(T);
-			}
-		}
-
-		public object ReadValueAsType(Type t)
-		{
-			object val = Read();
-			Type valType = val.GetType();
-			if (valType != t)
-			{
-				throw new UnexpectedTokenException(0,valType,t);
-			}
-
-			return val;
-		}
-		
-		public T SeekCurrent()
-		{
-			return values[index];
-		}
-	}
-
-	public class SyntaxTree
-	{
-		public Scope GlobalScope = new Scope(null);
-
-		private Scope CurrentScope;
-
-		public SyntaxTree()
-		{
-			CurrentScope = GlobalScope;
-		}
-	
-		public void AddStatement(Statement _toAdd)
-		{
-			CurrentScope.Statements.Add(_toAdd);
-			if (_toAdd is ConditionalStatement conditionalStatement)
-			{
-				conditionalStatement.ConditionalScope = new Scope(CurrentScope);
-				CurrentScope = conditionalStatement.ConditionalScope;
-			}
-		}
-
-		public void EndScope()
-		{
-			CurrentScope = CurrentScope.Parent;
-		}
-	}
-
-	public class Scope
-	{
-		public Scope Parent;
-		public List<Statement> Statements = new List<Statement>();
-
-		public Scope(Scope _parent)
-		{
-			Parent = _parent;
 		}
 	}
 }
