@@ -48,13 +48,13 @@ namespace OCRRFcompiler.Parsing
 			}
 		}
 
-		public object ReadValueAsType(Type t)
+		public T ReadValueAsType(Type t)
 		{
-			object val = Read();
+			T val = Read();
 			Type valType = val.GetType();
-			if (valType != t)
+			if (!valType.IsSubclassOf(t) && valType != t)
 			{
-				throw new UnexpectedTokenException(0,valType,t);
+				throw new UnexpectedTokenException(0,t,valType);
 			}
 
 			return val;

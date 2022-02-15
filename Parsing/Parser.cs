@@ -47,71 +47,23 @@ namespace OCRRFcompiler.Parsing
 		{
 			Expression _returnExpr;
 			
-			if (TokenReader.Seek() is OperatorToken)
+			if (TokenReader.Seek() is ExpressionComparason)
 			{
 				_returnExpr = ParseBinaryExpression();
 			}
 			else
 			{
-				_returnExpr = ParseExpression(true);
+				_returnExpr = ParseSingleExpression();
 			}
 
 			return _returnExpr;
 		}
 
-		private Expression ParseExpression(bool _notComparason)
+		private Expression ParseSingleExpression()
 		{
-			Expression _returnVal;
-			
-			object _currVal = TokenReader.Read();
-
-			if (_currVal is IntegerLiteralToken)
-			{
-				ExpressionLiteral<int> _derived = new ExpressionLiteral<int>();
-				IntegerLiteralToken _token = (IntegerLiteralToken) _currVal;
-
-				_derived.Value = _token.Value;
-
-				_returnVal = _derived;
-			} else if (_currVal is StringLiteralToken)
-			{
-				ExpressionLiteral<string> _derived = new ExpressionLiteral<string>();
-				StringLiteralToken _token = (StringLiteralToken) _currVal;
-
-				_derived.Value = _token.Value;
-				_returnVal = _derived;
-			} else if (_currVal is VarToken)
-			{
-				ExpressionVariable _derived = new ExpressionVariable();
-				VarToken _token = (VarToken) _currVal;
-
-				_derived.ValueName = _token.Value;
-				_returnVal = _derived;
-			} else if (_currVal is OperatorToken)
-			{
-				OperatorToken _token = (OperatorToken) _currVal;
-				ExpressionComparason _derived = new ExpressionComparason(_token.OperatorType);
-
-				_returnVal = _derived;
-			}
-			else
-			{
-				_returnVal = null;
-			}
-
-			return _returnVal;
+			return (Expression) TokenReader.ReadValueAsType(typeof(Expression));
 		}
-
-		private ExpressionVariable ParseVarExpression(VarToken _token)
-		{
-			ExpressionVariable _returnExpr;
-
-			_returnExpr = new ExpressionVariable();
-			_returnExpr.ValueName = _token.Value;
-
-
-			return _returnExpr;
-		}
+		
 		private BinaryExpression ParseBinaryExpression()
 		{
 			BinaryExpression _topLevelExpression = new BinaryExpression();
@@ -120,11 +72,20 @@ namespace OCRRFcompiler.Parsing
 			_topLevelExpression = (BinaryExpression)ParseSingleBinaryExpression();
 			while (true)
 			{
-				object _peek = ParseExpression(true);
-				if (_peek is not ExpressionComparason)
+				object _peek;
+				try
+				{
+					_peek = ParseExpression();
+					if (_peek is not ExpressionComparason)
+					{
+						break;
+					}
+				}
+				catch (UnexpectedTokenException)
 				{
 					break;
 				}
+				
 				
 				ExpressionComparason currentComparason = (ExpressionComparason)_peek;
 				BinaryExpression currExp = HighestBinaryExpressionWithPrecedenceLessThanGivenValueLeftWards(_topLevelExpression, currentComparason.Precedence);
@@ -133,7 +94,7 @@ namespace OCRRFcompiler.Parsing
 				currExp.LeftValue = lhs;
 				currExp.RightValue = ParseSingleBinaryExpression();
 
-				if (currExp.RightValue is not BinaryExpression)
+				if (currExp.RightValue is not BinaryExpression || currExp.RightValue is null)
 				{
 					break;
 				}
@@ -159,14 +120,21 @@ namespace OCRRFcompiler.Parsing
 
 		private Expression ParseSingleBinaryExpression()
 		{
-			if (TokenReader.Seek() is not OperatorToken) { return ParseExpression(true);}
+			if (TokenReader.Seek() is not ExpressionComparason) { return ParseExpression();}
 			
 			BinaryExpression currExpr = new BinaryExpression();
-
-			currExpr.LeftValue = ParseExpression(true);
-			OperatorToken token = (OperatorToken) TokenReader.Read();
-			currExpr.Comparason = new ExpressionComparason(token.OperatorType);
-			currExpr.RightValue = ParseExpression(true);
+			try
+			{
+				currExpr.LeftValue = ParseSingleExpression();
+				ExpressionComparason token = (ExpressionComparason) TokenReader.Read();
+				currExpr.Comparason = new ExpressionComparason(token.Operator);
+				currExpr.RightValue = ParseSingleExpression();
+			}
+			catch (UnexpectedTokenException)
+			{
+				currExpr = null;
+			}
+			
 			return currExpr;
 		}
 		
@@ -178,13 +146,11 @@ namespace OCRRFcompiler.Parsing
 			return statement;
 		}
 
-		private AssignmentStatement CreateAssignmentStatement(VarToken _var)
+		private AssignmentStatement CreateAssignmentStatement(ExpressionVariable _var)
 		{
 			AssignmentStatement returnValue = new AssignmentStatement();
-
-			ExpressionVariable variable = new ExpressionVariable();
-			variable.ValueName = _var.Value;
-			returnValue.Variable = variable;
+			
+			returnValue.Variable = _var;
 			
 			object assignment = TokenReader.Read();
 			if (assignment is AssignmentToken assignmentToken)
@@ -202,7 +168,7 @@ namespace OCRRFcompiler.Parsing
 		public ForLoopStatement ParseForLoop()
 		{
 			ForLoopStatement returnValue = new ForLoopStatement();
-			AssignmentStatement assignmentStatement = CreateAssignmentStatement((VarToken) TokenReader.ReadValueAsType(typeof(VarToken)));
+			AssignmentStatement assignmentStatement = CreateAssignmentStatement((ExpressionVariable) TokenReader.ReadValueAsType(typeof(ExpressionVariable)));
 
 			returnValue.Assignment = assignmentStatement;
 			
@@ -258,7 +224,7 @@ namespace OCRRFcompiler.Parsing
 			{
 				_returnStatement = identifier.ParseStatement(this);
 			}
-			else if (currentToken is VarToken var)
+			else if (currentToken is ExpressionVariable var)
 			{
 				_returnStatement = CreateAssignmentStatement(var);
 			}

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Transactions;
+using OCRRFcompiler.Expressions;
 using OCRRFcompiler.Tokens;
 
 namespace OCRRFcompiler.Scanning
@@ -90,14 +91,6 @@ namespace OCRRFcompiler.Scanning
 			}
 		}
 
-		public void ReadVar(TextReader _reader, char _currenVal)
-		{
-			VarToken _token = new VarToken();
-			_token.Value = ReadUntilChars(_reader, _currenVal,
-				new[] {' ', '=', '!', '<', '>', '\r', '\n', '(', ')', '+', '-', '*', '/'});
-			Tokens.Add(_token);
-		}
-
 		public string ReadUntilChars(TextReader _reader, char _currenVal, char[] _endChars)
 		{
 			StringBuilder var = new StringBuilder();
@@ -161,14 +154,14 @@ namespace OCRRFcompiler.Scanning
 				_currentValue = (char) _reader.Read();
 			}
 
-			IntegerLiteralToken _integerToken = new IntegerLiteralToken();
+			ExpressionLiteral<int> _integerToken = new ExpressionLiteral<int>();
 			_integerToken.Value = Int32.Parse(_integer.ToString());
 			Tokens.Add(_integerToken);
 		}
 
 		public void ReadStringLiteral(TextReader _reader)
 		{
-			StringLiteralToken _str = new StringLiteralToken();
+			ExpressionLiteral<string> _str = new ExpressionLiteral<string>();
 			_str.Value = ReadUntilChar(_reader, '\0', '"');
 
 			Tokens.Add(_str);
@@ -178,8 +171,7 @@ namespace OCRRFcompiler.Scanning
 		{
 			if ((char) _reader.Peek() == '=')
 			{
-				OperatorToken operatorToken = new OperatorToken();
-				operatorToken.OperatorType = Operators.Equal;
+				ExpressionComparason operatorToken = new ExpressionComparason(Operators.Equal);
 				Tokens.Add(operatorToken);
 			}
 			else
@@ -192,8 +184,7 @@ namespace OCRRFcompiler.Scanning
 
 		public void ReadComparason(Operators _operator)
 		{
-			OperatorToken _token = new OperatorToken();
-			_token.OperatorType = _operator;
+			ExpressionComparason _token = new ExpressionComparason(_operator);
 			Tokens.Add(_token);
 		}
 
@@ -209,15 +200,14 @@ namespace OCRRFcompiler.Scanning
 				Tokens.Add(_token);
 			} else if (OperatorsMap.TryGetValue(_fullValue, out Operators value))
 			{
-				OperatorToken token = new OperatorToken();
-				token.OperatorType = value;
+				ExpressionComparason token = new ExpressionComparason(value);
 
 				Tokens.Add(token);
 			}
 			else
 			{
-				VarToken _token = new VarToken();
-				_token.Value = _fullValue;
+				ExpressionVariable _token = new ExpressionVariable();
+				_token.ValueName = _fullValue;
 
 				Tokens.Add(_token);
 			}
@@ -295,20 +285,6 @@ namespace OCRRFcompiler.Scanning
 		ENDOFLINE
 	}
 	
-	public struct StringLiteralToken
-	{
-		public string Value;
-	}
-
-	public struct IntegerLiteralToken
-	{
-		public int Value;
-	}
-	public struct OperatorToken
-	{
-		public Operators OperatorType;
-	}
-
 	public enum Operators
 	{
 		Equal,
@@ -324,13 +300,6 @@ namespace OCRRFcompiler.Scanning
 		DIVISION,
 		PLUS,
 		SUBTRACT,
-	}
-	
-	
-	public struct VarToken
-	{
-		public string Value;
-		public Type VarType;
 	}
 
 	public struct AssignmentToken
