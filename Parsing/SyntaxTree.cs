@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using OCRRFcompiler.IlGeneration;
 using OCRRFcompiler.Statements;
 
 namespace OCRRFcompiler.Parsing
@@ -7,7 +8,7 @@ namespace OCRRFcompiler.Parsing
 	{
 		public Scope GlobalScope = new Scope(null);
 
-		private Scope CurrentScope;
+		public Scope CurrentScope;
 
 		public SyntaxTree()
 		{
@@ -34,7 +35,17 @@ namespace OCRRFcompiler.Parsing
 	{
 		public Scope Parent;
 		public List<Statement> Statements = new List<Statement>();
+		public string GenerateIl(IlManager _manager)
+		{
+			string returnValue = "";
+			foreach (Statement s in Statements)
+			{
+				returnValue += s.GenerateIl(_manager);
+			}
 
+			return returnValue;
+		}
+		
 		public Scope(Scope _parent)
 		{
 			Parent = _parent;
