@@ -8,6 +8,7 @@ namespace OCRRFcompiler.Testing
 	{
 		private Parser parser = new Parser();
 		[Test]
+		[Ignore("Takes 30ms")]
 		public void ExternalParserTest()
 		{
 			parser.ParseLocation(Directory.GetCurrentDirectory() + @"\Test.rl");

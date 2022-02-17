@@ -10,6 +10,7 @@ namespace OCRRFcompiler.Testing
 		private Scanner scanner = new Scanner();
 
 		[Test]
+		[Ignore("Takes 30ms")]
 		public void ExternalScannerTest()
 		{
 			Scanner scan = new Scanner();

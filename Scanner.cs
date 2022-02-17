@@ -216,7 +216,7 @@ namespace OCRRFcompiler.Scanning
 		public static readonly Dictionary<string, Type> IdentifiersMap = new Dictionary<string, Type>()
 		{
 			{"if", typeof(IfToken)},
-			{"then", typeof(NextToken)},
+			{"then", typeof(NullToken)},
 			{"endif", typeof(EndScopeToken)},
 			{"switch", null},
 			{"case", null},
@@ -225,9 +225,9 @@ namespace OCRRFcompiler.Scanning
 			{"while", typeof(WhileToken)},
 			{"endwhile", typeof(EndWhileToken)},
 			{"for", typeof(ForToken)},
-			{"to", typeof(NextToken)},
+			{"to", typeof(NullToken)},
 			{"next", typeof(NextToken)},
-			{"step", typeof(NextToken)},
+			{"step", typeof(NullToken)},
 			{"const", null},
 			{"global", null},
 			{"procedure", null},
