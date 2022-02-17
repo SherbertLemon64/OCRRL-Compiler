@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using OCRRFcompiler.IlGeneration;
 using OCRRFcompiler.Scanning;
 
 namespace OCRRFcompiler.Expressions
 {
-	public class Expression
+	public abstract class Expression
 	{
 		public Type ExpressionType;
-
+		public abstract string GenerateIl(IlManager _manager);
 		public Expression Copy()
 		{
 			return (Expression)this.MemberwiseClone();
@@ -17,7 +19,11 @@ namespace OCRRFcompiler.Expressions
 	{
 		public Operators Operator;
 		public int Precedence;
-		
+		public override string GenerateIl(IlManager _manager)
+		{
+			return $"{_manager.GetFormattedAddressAndIncrement()} ceq\n";
+		}
+
 		private static readonly int[] ComparasonsPrecedence = new[]
 		{
 			3,
@@ -43,11 +49,28 @@ namespace OCRRFcompiler.Expressions
 	public class ExpressionLiteral<T> : Expression
 	{
 		public T Value;
+		public override string GenerateIl(IlManager _manager)
+		{
+			if (Value is string)
+			{
+				return $"{_manager.GetFormattedAddressAndIncrement()} ldstr \"{Value}\"\n";
+			} else if (Value is int)
+			{
+				return $"{_manager.GetFormattedAddressAndIncrement()} ldc.i4 {Value}\n";
+			}
+
+			return null;
+		}
 	}
 
 	public class ExpressionVariable : Expression
 	{
 		public string ValueName;
+		public int VariableIndex;
+		public override string GenerateIl(IlManager _manager)
+		{
+			return $"{_manager.GetFormattedAddressAndIncrement()} ldloc.{VariableIndex}\n";
+		}
 	}
 
 	public class BinaryExpression : Expression
@@ -56,5 +79,16 @@ namespace OCRRFcompiler.Expressions
 		public Expression RightValue;
 
 		public ExpressionComparason Comparason;
+		public override string GenerateIl(IlManager _manager)
+		{
+			string returnValue = "";
+
+			returnValue += LeftValue.GenerateIl(_manager);
+			returnValue += RightValue.GenerateIl(_manager);
+
+			returnValue += Comparason.GenerateIl(_manager);
+
+			return returnValue;
+		}
 	}
 }
