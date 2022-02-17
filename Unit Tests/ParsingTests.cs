@@ -1,21 +1,14 @@
-using System;
-using System.IO;
+﻿using System.IO;
 using NUnit.Framework;
 using OCRRFcompiler.Parsing;
-using OCRRFcompiler.Scanning;
 
 namespace OCRRFcompiler.Testing
 {
-	public class Tests
+	public class ParsingTests
 	{
 		private Parser parser = new Parser();
-		[SetUp]
-		public void Setup()
-		{
-		}
-
 		[Test]
-		public void TestParser()
+		public void ExternalParserTest()
 		{
 			parser.ParseLocation(Directory.GetCurrentDirectory() + @"\Test.rl");
 
@@ -44,16 +37,6 @@ namespace OCRRFcompiler.Testing
 					y = y + 1
 				endwhile";
 			parser.Parse(whileLoop);
-		}
-
-		[Test]
-		public void ScanTest()
-		{
-			Scanner scan = new Scanner();
-			string text = File.ReadAllText(Directory.GetCurrentDirectory() + @"\Test.rl");
-			TextReader read = new StringReader(text);
-			
-			scan.Scan(read);
 		}
 	}
 }
