@@ -33,7 +33,7 @@ namespace OCRRFcompiler.Tokens
 	{
 		public override Statement ParseStatement(Parser _parser)
 		{
-			// swallow the variable token after next
+			// swallow variable after next statement
 			_parser.ParseExpression();
 			return null;
 		}

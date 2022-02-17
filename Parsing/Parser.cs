@@ -43,7 +43,7 @@ namespace OCRRFcompiler.Parsing
 			}
 		}
 		
-		private Expression ParseExpression()
+		public Expression ParseExpression()
 		{
 			Expression _returnExpr;
 			
@@ -206,19 +206,16 @@ namespace OCRRFcompiler.Parsing
 			return statement;
 		}
 
-		public ForLoopEndStatement ParseForLoopEndStatement()
+		public void ParseForLoopEndStatement()
 		{
-			ForLoopEndStatement statement = new ForLoopEndStatement();
 			Tree.EndScope();
-			statement.Variable = (ExpressionVariable) ParseExpression();
-			return statement;
 		}
 		
 		private Statement ParseNextStatement()
 		{
 			object currentToken = TokenReader.Read();
 			
-			Statement _returnStatement = new Statement();
+			Statement _returnStatement;
 
 			if (currentToken is Identifier identifier)
 			{
