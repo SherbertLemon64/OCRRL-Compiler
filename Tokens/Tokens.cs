@@ -31,7 +31,12 @@ namespace OCRRFcompiler.Tokens
 
 	public class NextToken : Identifier
 	{
-		public override ForLoopEndStatement ParseStatement(Parser _parser) => _parser.ParseForLoopEndStatement();
+		public override Statement ParseStatement(Parser _parser)
+		{
+			// swallow the variable token after next
+			_parser.ParseExpression();
+			return null;
+		}
 	}
 
 	public class ForToken : Identifier
