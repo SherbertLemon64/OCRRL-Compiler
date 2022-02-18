@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using OCRRFcompiler.Expressions;
 using OCRRFcompiler.IlGeneration;
 using OCRRFcompiler.Statements;
 
@@ -21,7 +22,11 @@ namespace OCRRFcompiler.Parsing
 			if (_toAdd is ConditionalStatement conditionalStatement)
 			{
 				conditionalStatement.ConditionalScope = new Scope(CurrentScope);
+				CurrentScope.SubScopes.Add(conditionalStatement);
 				CurrentScope = conditionalStatement.ConditionalScope;
+			} else if (_toAdd is AssignmentStatement assignmentStatement)
+			{
+				CurrentScope.Variables.Add(assignmentStatement.Variable);
 			}
 		}
 
@@ -35,6 +40,10 @@ namespace OCRRFcompiler.Parsing
 	{
 		public Scope Parent;
 		public List<Statement> Statements = new List<Statement>();
+		public HashSet<ExpressionVariable> Variables = new HashSet<ExpressionVariable>();
+		public List<ConditionalStatement> SubScopes = new List<ConditionalStatement>();
+
+		public HashSet<ExpressionVariable> UpperScopeVariables;
 		public string GenerateIl(IlManager _manager)
 		{
 			string returnValue = "";

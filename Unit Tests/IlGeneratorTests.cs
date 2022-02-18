@@ -30,6 +30,7 @@ namespace OCRRFcompiler.Testing
 				y = 0
 				for x=0 to 100 step 2
 					y = 2
+					z = 10
 				next x";
 			parser.Parse(forLoop);
 			
