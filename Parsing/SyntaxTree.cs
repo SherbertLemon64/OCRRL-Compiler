@@ -24,9 +24,6 @@ namespace OCRRFcompiler.Parsing
 				conditionalStatement.ConditionalScope = new Scope(CurrentScope);
 				CurrentScope.SubScopes.Add(conditionalStatement);
 				CurrentScope = conditionalStatement.ConditionalScope;
-			} else if (_toAdd is AssignmentStatement assignmentStatement)
-			{
-				CurrentScope.Variables.Add(assignmentStatement.Variable);
 			}
 		}
 

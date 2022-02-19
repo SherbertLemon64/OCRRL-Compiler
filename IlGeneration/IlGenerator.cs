@@ -29,6 +29,7 @@ namespace OCRRFcompiler.IlGeneration
 				foreach (ExpressionVariable v in _topScope.Variables)
 				{
 					v.VariableIndex = index;
+					index++;
 				}
 			}
 			

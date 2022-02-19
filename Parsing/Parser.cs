@@ -162,6 +162,8 @@ namespace OCRRFcompiler.Parsing
 				throw new UnexpectedTokenException(0, typeof(Expression), assignment.GetType());
 			}
 
+			Tree.CurrentScope.Variables.Add(returnValue.Variable);
+			
 			return returnValue;
 		}
 

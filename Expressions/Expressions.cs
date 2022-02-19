@@ -56,7 +56,7 @@ namespace OCRRFcompiler.Expressions
 				return $"{_manager.GetFormattedAddressAndIncrement()} ldstr \"{Value}\"\n";
 			} else if (Value is int)
 			{
-				return $"{_manager.GetFormattedAddressAndIncrement()} ldc.i4 {Value}\n";
+				return $"{_manager.GetFormattedAddressAndIncrement()} ldc.i4.s {Value}\n";
 			}
 
 			return null;

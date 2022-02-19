@@ -1,4 +1,6 @@
-﻿namespace OCRRFcompiler.IlGeneration
+﻿using System;
+
+namespace OCRRFcompiler.IlGeneration
 {
 	public class IlManager
 	{
@@ -6,7 +8,7 @@
 
 		public string GetFormattedAddressAndIncrement()
 		{
-			string returnValue = $"IL_{address.ToString("X")}:";
+			string returnValue = $"IL_{Convert.ToString(address, 16).PadLeft(4, '0')}:";
 			address++;
 			return returnValue;
 		}
@@ -21,7 +23,7 @@
 
 		public static string FormatAddress(long _address)
 		{
-			return $"IL_{_address.ToString("X")}";
+			return $"IL_{Convert.ToString(_address, 16).PadLeft(4, '0')}";
 		}
 	}
 }
