@@ -56,6 +56,9 @@ namespace OCRRFcompiler.Statements
 			string returnValue = $"{Assignment.GenerateIl(_manager)}\n" +
 			                     $"{_manager.GetFormattedAddressAndIncrement()} br.s {IlManager.FormatAddress(startAddress)}\n";
 			startAddress = _manager.address;
+
+			returnValue += $"{IncrementAssignment.GenerateIl(_manager)}";
+			
 			returnValue += $"{ConditionalScope.GenerateIl(_manager)}" +
 			               $"{Check.GenerateIl(_manager)}" +
 			               $"{_manager.GetFormattedAddressAndIncrement()} blt.s {IlManager.FormatAddress(startAddress)}\n";
