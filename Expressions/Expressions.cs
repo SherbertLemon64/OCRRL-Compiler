@@ -21,7 +21,32 @@ namespace OCRRFcompiler.Expressions
 		public int Precedence;
 		public override string GenerateIl(IlManager _manager)
 		{
-			return $"{_manager.GetFormattedAddressAndIncrement()} ceq\n";
+			string returnValue = "";
+			switch (Operator)
+			{
+				case Operators.Equal:
+				{
+					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} ceq\n";
+					break;
+				}
+				case Operators.LessThan:
+				{
+					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} clt\n";
+					break;
+				}
+				case Operators.GreaterThan:
+				{
+					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} cgt\n";
+					break;
+				}
+				case Operators.PLUS:
+				{
+					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} add\n";
+					break;
+				}
+			}
+
+			return returnValue;
 		}
 
 		private static readonly int[] ComparasonsPrecedence = new[]

@@ -16,7 +16,16 @@ namespace OCRRFcompiler.Statements
 		public Scope ConditionalScope;
 		public override string GenerateIl(IlManager _manager)
 		{
-			throw new System.NotImplementedException();
+			string returnValue = "";
+			// put an expression infront, which should push a 1 or 0 onto the stack for evaluation
+			returnValue += Check.GenerateIl(_manager);
+			string branchStatement = $"{_manager.GetFormattedAddressAndIncrement()} brfalse.s "; // this needs an index at the end to tell it where to branch to
+			// Get the subscope Il
+			string subscope = ConditionalScope.GenerateIl(_manager);
+			// tell the branch statement to branch to the address one after the end of the subscope
+			branchStatement += $"{IlManager.FormatAddress(_manager.address + 1)}\n";
+			
+			return returnValue + branchStatement + subscope;
 		}
 	}
 
@@ -47,24 +56,28 @@ namespace OCRRFcompiler.Statements
 			long startAddress = _manager.address;
 
 			IncrementAssignment = new AssignmentStatement();
+			
 			IncrementAssignment.Variable = Assignment.Variable;
 			BinaryExpression increment = new BinaryExpression();
 			increment.Comparason = new ExpressionComparason(Operators.PLUS);
 			increment.LeftValue = Assignment.Variable;
 			increment.RightValue = new ExpressionLiteral<int>() {Value = Step};
-
+			IncrementAssignment.Assignment = increment;
+			
 			string returnValue = $"{Assignment.GenerateIl(_manager)}\n" +
-			                     $"{_manager.GetFormattedAddressAndIncrement()} br.s {IlManager.FormatAddress(startAddress)}\n";
+			                     $"{_manager.GetFormattedAddressAndIncrement()} br.s ";
 			startAddress = _manager.address;
 
-			returnValue += $"{IncrementAssignment.GenerateIl(_manager)}";
+			string scopeIl = $"{ConditionalScope.GenerateIl(_manager)}";
 			
-			returnValue += $"{ConditionalScope.GenerateIl(_manager)}" +
-			               $"{Check.GenerateIl(_manager)}" +
-			               $"{_manager.GetFormattedAddressAndIncrement()} blt.s {IlManager.FormatAddress(startAddress)}\n";
+			string incrementIl = $"{IncrementAssignment.GenerateIl(_manager)}";
+			// sets the break to the start of the comparason
+			returnValue += $"{IlManager.FormatAddress(_manager.address + 1)}\n";
+			string checkIl = $"{Check.GenerateIl(_manager)}";
+			checkIl +=
+				$"{_manager.GetFormattedAddressAndIncrement()} brtrue.s {IlManager.FormatAddress(startAddress)}\n";
 
-
-			return returnValue;
+			return returnValue + scopeIl + incrementIl + checkIl;
 		}
 	}
 	
