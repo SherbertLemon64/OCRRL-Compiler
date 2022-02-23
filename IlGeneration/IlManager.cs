@@ -6,7 +6,7 @@ namespace OCRRFcompiler.IlGeneration
 	{
 		public long address { get; private set; }
 
-		public string GetFormattedAddressAndIncrement()
+		public string NextFormattedAddress()
 		{
 			string returnValue = $"IL_{Convert.ToString(address, 16).PadLeft(4, '0')}:";
 			address++;

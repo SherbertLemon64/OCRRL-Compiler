@@ -26,22 +26,22 @@ namespace OCRRFcompiler.Expressions
 			{
 				case Operators.Equal:
 				{
-					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} ceq\n";
+					returnValue = $"{_manager.NextFormattedAddress()} ceq\n";
 					break;
 				}
 				case Operators.LessThan:
 				{
-					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} clt\n";
+					returnValue = $"{_manager.NextFormattedAddress()} clt\n";
 					break;
 				}
 				case Operators.GreaterThan:
 				{
-					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} cgt\n";
+					returnValue = $"{_manager.NextFormattedAddress()} cgt\n";
 					break;
 				}
 				case Operators.PLUS:
 				{
-					returnValue = $"{_manager.GetFormattedAddressAndIncrement()} add\n";
+					returnValue = $"{_manager.NextFormattedAddress()} add\n";
 					break;
 				}
 			}
@@ -78,10 +78,10 @@ namespace OCRRFcompiler.Expressions
 		{
 			if (Value is string)
 			{
-				return $"{_manager.GetFormattedAddressAndIncrement()} ldstr \"{Value}\"\n";
+				return $"{_manager.NextFormattedAddress()} ldstr \"{Value}\"\n";
 			} else if (Value is int)
 			{
-				return $"{_manager.GetFormattedAddressAndIncrement()} ldc.i4.s {Value}\n";
+				return $"{_manager.NextFormattedAddress()} ldc.i4.s {Value}\n";
 			}
 
 			return null;
@@ -94,7 +94,7 @@ namespace OCRRFcompiler.Expressions
 		public int VariableIndex;
 		public override string GenerateIl(IlManager _manager)
 		{
-			return $"{_manager.GetFormattedAddressAndIncrement()} ldloc.{VariableIndex}\n";
+			return $"{_manager.NextFormattedAddress()} ldloc.{VariableIndex}\n";
 		}
 	}
 

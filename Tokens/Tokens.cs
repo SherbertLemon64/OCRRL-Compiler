@@ -16,7 +16,15 @@ namespace OCRRFcompiler.Tokens
 
 	public class WhileToken : Identifier
 	{
-		public override ConditionalStatement ParseStatement(Parser _parser) => _parser.ParseConditionalStatement();
+		public override WhileLoopStatement ParseStatement(Parser _parser)
+		{
+			WhileLoopStatement whileLoopStatement = new WhileLoopStatement();
+			ConditionalStatement conditionalStatement = _parser.ParseConditionalStatement();
+			whileLoopStatement.Check = conditionalStatement.Check;
+			whileLoopStatement.ConditionalScope = conditionalStatement.ConditionalScope;
+			
+			return whileLoopStatement;
+		}
 	}
 
 	public class EndScopeToken : Identifier
@@ -26,7 +34,7 @@ namespace OCRRFcompiler.Tokens
 
 	public class EndWhileToken : Identifier
 	{
-		public override LoopEndStatement ParseStatement(Parser _parser) => _parser.ParseLoopEndStatement();
+		public override LoopEndStatement ParseStatement(Parser _parser) => null;
 	}
 
 	public class NextToken : Identifier
