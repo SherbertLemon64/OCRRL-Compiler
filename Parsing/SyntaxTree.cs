@@ -31,6 +31,18 @@ namespace OCRRFcompiler.Parsing
 		{
 			CurrentScope = CurrentScope.Parent;
 		}
+
+		public void AddVariable(ref ExpressionVariable _variable)
+		{
+			foreach (ExpressionVariable v in CurrentScope.UpperScopeVariables)
+			{
+				if (v.ValueName == _variable.ValueName)
+				{
+					_variable = v;
+					break;
+				}
+			}
+		}
 	}
 
 	public class Scope
