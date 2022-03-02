@@ -153,8 +153,9 @@ namespace OCRRFcompiler.Scanning
 				_integer.Append(_currentValue);
 				_currentValue = (char) _reader.Read();
 			}
-
+			
 			ExpressionLiteral<int> _integerToken = new ExpressionLiteral<int>();
+			_integerToken.ExpressionType = typeof(int);
 			_integerToken.Value = Int32.Parse(_integer.ToString());
 			Tokens.Add(_integerToken);
 		}
@@ -163,7 +164,7 @@ namespace OCRRFcompiler.Scanning
 		{
 			ExpressionLiteral<string> _str = new ExpressionLiteral<string>();
 			_str.Value = ReadUntilChar(_reader, '\0', '"');
-
+			_str.ExpressionType = typeof(string);
 			Tokens.Add(_str);
 		}
 

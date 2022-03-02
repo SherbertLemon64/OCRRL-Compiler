@@ -10,70 +10,34 @@ namespace OCRRFcompiler.IlGeneration
 	{
 		private SyntaxTree Tree;
 
+		private List<ExpressionVariable> allVariables;
+
 		public string GenerateIl(SyntaxTree _tree)
 		{
 			Tree = _tree;
 			IlManager manager = new IlManager();
 			SetVariableIndices(_tree.GlobalScope);
 
-			return _tree.GlobalScope.GenerateIl(manager);
-		}
-
-		private void SetVariableIndices(Scope _topScope)
-		{
-			// if the topscope is the global scope set their variables as all are unique
-			if (_topScope.Parent is null)
-			{
-				// can't do a for loop because hasSets aren't ordered
-				int index = 0;
-				foreach (ExpressionVariable v in _topScope.Variables)
-				{
-					v.VariableIndex = index;
-					index++;
-				}
-			}
+			string ilCode = _tree.GlobalScope.GenerateIl(manager);
 			
-			_topScope.UpperScopeVariables ??= GetAllUpperVariables(_topScope);
-			foreach (ConditionalStatement c in _topScope.SubScopes)
-			{
-				int i = _topScope.UpperScopeVariables.Count;
-				
-				foreach (ExpressionVariable v in c.ConditionalScope.Variables)
-				{
-					// non-linear search
-					bool removed = false;
-					
-					foreach (ExpressionVariable v2 in _topScope.UpperScopeVariables)
-					{
-						if (v.ValueName == v2.ValueName)
-						{
-							removed = true;
-							c.ConditionalScope.Variables.Remove(v);
-							break;
-						}
-					}
-					// if it is a unique variable
-					if (!removed)
-					{
-						v.VariableIndex = i;
-						i++;
-					}
-				}
-				
-				SetVariableIndices(c.ConditionalScope);
-			}
+			
+			
+			return null;
 		}
 
-		private HashSet<ExpressionVariable> GetAllUpperVariables(Scope _scope)
+		public string GenerateLocals()
 		{
-			HashSet<ExpressionVariable> upperVariables = new HashSet<ExpressionVariable>(_scope.Variables);
-			while (_scope.Parent is not null)
+			string returnValue = $".locals init (\n";
+			int i = 0;
+			foreach (ExpressionVariable v in allVariables)
 			{
-				upperVariables.Concat(_scope.Parent.Variables);
-				_scope = _scope.Parent;
+				returnValue += $"[{i}] {v.ExpressionType.Name} {v.ValueName}\n";
+				i++;
 			}
 
-			return upperVariables;
+			returnValue += ")";
+			
+			return returnValue;
 		}
 	}
 }

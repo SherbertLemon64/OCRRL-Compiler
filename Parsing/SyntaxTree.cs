@@ -39,9 +39,20 @@ namespace OCRRFcompiler.Parsing
 				if (v.ValueName == _variable.ValueName)
 				{
 					_variable = v;
-					break;
+					return;
 				}
 			}
+			
+			foreach (ExpressionVariable v in CurrentScope.Variables)
+			{
+				if (v.ValueName == _variable.ValueName)
+				{
+					_variable = v;
+					return;
+				}
+			}
+
+			CurrentScope.Variables.Add(_variable);
 		}
 	}
 

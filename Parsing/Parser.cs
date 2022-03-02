@@ -146,7 +146,7 @@ namespace OCRRFcompiler.Parsing
 			return statement;
 		}
 
-		private AssignmentStatement CreateAssignmentStatement(ExpressionVariable _var)
+		private AssignmentStatement ParseAssignmentStatement(ExpressionVariable _var)
 		{
 			AssignmentStatement returnValue = new AssignmentStatement();
 			
@@ -162,6 +162,8 @@ namespace OCRRFcompiler.Parsing
 				throw new UnexpectedTokenException(0, typeof(Expression), assignment.GetType());
 			}
 
+			_var.ExpressionType = returnValue.Assignment.ExpressionType;
+			
 			Tree.CurrentScope.Variables.Add(returnValue.Variable);
 			
 			return returnValue;
@@ -170,7 +172,7 @@ namespace OCRRFcompiler.Parsing
 		public ForLoopStatement ParseForLoop()
 		{
 			ForLoopStatement returnValue = new ForLoopStatement();
-			AssignmentStatement assignmentStatement = CreateAssignmentStatement((ExpressionVariable) TokenReader.ReadValueAsType(typeof(ExpressionVariable)));
+			AssignmentStatement assignmentStatement = ParseAssignmentStatement((ExpressionVariable) TokenReader.ReadValueAsType(typeof(ExpressionVariable)));
 
 			returnValue.Assignment = assignmentStatement;
 			
@@ -225,7 +227,7 @@ namespace OCRRFcompiler.Parsing
 			}
 			else if (currentToken is ExpressionVariable var)
 			{
-				_returnStatement = CreateAssignmentStatement(var);
+				_returnStatement = ParseAssignmentStatement(var);
 			}
 			else
 			{
