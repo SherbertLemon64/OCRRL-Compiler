@@ -61,7 +61,15 @@ namespace OCRRFcompiler.Parsing
 
 		private Expression ParseSingleExpression()
 		{
-			return (Expression) TokenReader.ReadValueAsType(typeof(Expression));
+			Expression returnValue = (Expression) TokenReader.ReadValueAsType(typeof(Expression));
+
+			if (returnValue is ExpressionVariable variable)
+			{
+				Tree.AddVariable(ref variable);
+				return variable;
+			}
+
+			return returnValue;
 		}
 		
 		private BinaryExpression ParseBinaryExpression()
