@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection.Emit;
 using OCRRFcompiler.Expressions;
 using OCRRFcompiler.IlGeneration;
 using OCRRFcompiler.Statements;
@@ -7,6 +8,8 @@ namespace OCRRFcompiler.Parsing
 {
 	public class SyntaxTree
 	{
+		public HashSet<ExpressionVariable> AllVariables = new HashSet<ExpressionVariable>();
+		
 		public Scope GlobalScope = new Scope(null);
 
 		public Scope CurrentScope;
