@@ -55,7 +55,8 @@ namespace OCRRFcompiler.Parsing
 				}
 			}
 
-			CurrentScope.Variables.Add(_variable);
+			AllVariables.Add(_variable);
+			CurrentScope.AddVariable(_variable);
 		}
 	}
 
@@ -77,10 +78,28 @@ namespace OCRRFcompiler.Parsing
 
 			return returnValue;
 		}
+
+		public void AddVariable(ExpressionVariable _variable)
+		{
+			Variables.Add(_variable);
+			foreach (ConditionalStatement lowerScope in SubScopes)
+			{
+				lowerScope.ConditionalScope.UpperScopeVariables.Add(_variable);
+			}
+		}
 		
 		public Scope(Scope _parent)
 		{
 			Parent = _parent;
+			if (_parent is not null)
+			{
+				UpperScopeVariables = new HashSet<ExpressionVariable>(_parent.Variables);
+				UpperScopeVariables.UnionWith(_parent.UpperScopeVariables);
+			}
+			else
+			{
+				UpperScopeVariables = new HashSet<ExpressionVariable>();
+			}
 		}
 	}
 }

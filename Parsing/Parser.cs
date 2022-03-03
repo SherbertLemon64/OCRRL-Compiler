@@ -156,6 +156,7 @@ namespace OCRRFcompiler.Parsing
 
 		private AssignmentStatement ParseAssignmentStatement(ExpressionVariable _var)
 		{
+			Tree.AddVariable(ref _var);
 			AssignmentStatement returnValue = new AssignmentStatement();
 			
 			returnValue.Variable = _var;
