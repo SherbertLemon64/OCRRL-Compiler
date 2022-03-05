@@ -57,6 +57,7 @@ namespace OCRRFcompiler.Parsing
 
 			AllVariables.Add(_variable);
 			CurrentScope.AddVariable(_variable);
+			_variable.VariableIndex = CurrentScope.UpperScopeVariables.Count + CurrentScope.Variables.Count;
 		}
 	}
 
