@@ -8,7 +8,7 @@ namespace OCRRFcompiler.IlGeneration
 
 		public string NextFormattedAddress()
 		{
-			string returnValue = $"IL_{Convert.ToString(address, 16).PadLeft(4, '0')}:";
+			string returnValue = $"\nIL_{Convert.ToString(address, 16).PadLeft(4, '0')}:";
 			address++;
 			return returnValue;
 		}

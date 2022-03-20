@@ -23,7 +23,7 @@ namespace OCRRFcompiler.Statements
 			// Get the subscope Il
 			string subscope = ConditionalScope.GenerateIl(_manager);
 			// tell the branch statement to branch to the address one after the end of the subscope
-			branchStatement += $"{IlManager.FormatAddress(_manager.address + 1)}\n";
+			branchStatement += $"{IlManager.FormatAddress(_manager.address + 1)}";
 			
 			return returnValue + branchStatement + subscope;
 		}
@@ -64,7 +64,7 @@ namespace OCRRFcompiler.Statements
 			increment.RightValue = new ExpressionLiteral<int>() {Value = Step};
 			IncrementAssignment.Assignment = increment;
 			
-			string returnValue = $"{Assignment.GenerateIl(_manager)}\n" +
+			string returnValue = $"{Assignment.GenerateIl(_manager)}" +
 			                     $"{_manager.NextFormattedAddress()} br.s ";
 			startAddress = _manager.address;
 
@@ -72,10 +72,10 @@ namespace OCRRFcompiler.Statements
 			
 			string incrementIl = $"{IncrementAssignment.GenerateIl(_manager)}";
 			// sets the break to the start of the comparason
-			returnValue += $"{IlManager.FormatAddress(_manager.address + 1)}\n";
+			returnValue += $"{IlManager.FormatAddress(_manager.address)}";
 			string checkIl = $"{Check.GenerateIl(_manager)}";
 			checkIl +=
-				$"{_manager.NextFormattedAddress()} brtrue.s {IlManager.FormatAddress(startAddress)}\n";
+				$"{_manager.NextFormattedAddress()} brtrue.s {IlManager.FormatAddress(startAddress)}";
 
 			return returnValue + scopeIl + incrementIl + checkIl;
 		}
@@ -87,8 +87,8 @@ namespace OCRRFcompiler.Statements
 		public Expression Assignment;
 		public override string GenerateIl(IlManager _manager)
 		{
-			return $"{Assignment.GenerateIl(_manager)}\n" +
-			       $"{_manager.NextFormattedAddress()} stloc.{Variable.VariableIndex}\n";
+			return $"{Assignment.GenerateIl(_manager)}" +
+			       $"{_manager.NextFormattedAddress()} stloc.{Variable.VariableIndex}";
 		}
 	}
 
@@ -101,7 +101,7 @@ namespace OCRRFcompiler.Statements
 			long subscopeStart = _manager.address + 1;
 			
 			string subscope = ConditionalScope.GenerateIl(_manager);
-			branchToCondition += $"{IlManager.FormatAddress(_manager.address + 1)}\n";
+			branchToCondition += $"{IlManager.FormatAddress(_manager.address + 1)}";
 
 			string condidition = Check.GenerateIl(_manager) +
 			                     $"{_manager.NextFormattedAddress()} blt.s {IlManager.FormatAddress(subscopeStart)}";

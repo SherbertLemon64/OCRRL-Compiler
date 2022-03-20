@@ -8,7 +8,7 @@ namespace OCRRFcompiler.Parsing
 {
 	public class SyntaxTree
 	{
-		public HashSet<ExpressionVariable> AllVariables = new HashSet<ExpressionVariable>();
+		public List<ExpressionVariable> AllVariables = new List<ExpressionVariable>();
 		
 		public Scope GlobalScope = new Scope(null);
 
@@ -54,10 +54,9 @@ namespace OCRRFcompiler.Parsing
 					return;
 				}
 			}
-
+			_variable.VariableIndex = CurrentScope.UpperScopeVariables.Count + CurrentScope.Variables.Count;
 			AllVariables.Add(_variable);
 			CurrentScope.AddVariable(_variable);
-			_variable.VariableIndex = CurrentScope.UpperScopeVariables.Count + CurrentScope.Variables.Count;
 		}
 	}
 

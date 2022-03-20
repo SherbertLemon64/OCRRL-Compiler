@@ -39,8 +39,6 @@ namespace OCRRFcompiler.Testing
 				next x";
 			parser.Parse(forLoop);
 			
-			
-			
 			string il = generator.GenerateIl(parser.Tree);
 			
 			File.WriteAllText("ForLoop.il", il);
@@ -54,7 +52,7 @@ namespace OCRRFcompiler.Testing
 			string whileLoop = 
 				@"
 				y = 0
-				while y<10 AND y > 5
+				while y<10
 					y = y + 1
 				endwhile";
 			parser.Parse(whileLoop);

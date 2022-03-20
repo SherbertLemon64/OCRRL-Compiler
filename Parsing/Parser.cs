@@ -173,7 +173,7 @@ namespace OCRRFcompiler.Parsing
 
 			_var.ExpressionType = returnValue.Assignment.ExpressionType;
 			
-			Tree.CurrentScope.Variables.Add(returnValue.Variable);
+			Tree.AddVariable(ref returnValue.Variable);
 			
 			return returnValue;
 		}

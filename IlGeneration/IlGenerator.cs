@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using OCRRFcompiler.Expressions;
 using OCRRFcompiler.Parsing;
@@ -9,7 +10,11 @@ namespace OCRRFcompiler.IlGeneration
 	public class IlGenerator
 	{
 		private SyntaxTree Tree;
-		
+		private readonly Dictionary<Type, string> TypeNames = new Dictionary<Type, string>()
+		{
+			{ typeof(string), "string" },
+			{ typeof(int), "int32" },
+		};
 
 		public string GenerateIl(SyntaxTree _tree)
 		{
@@ -17,7 +22,8 @@ namespace OCRRFcompiler.IlGeneration
 			IlManager manager = new IlManager();
 
 			string ilCode = _tree.GlobalScope.GenerateIl(manager);
-
+			ilCode += $"{manager.NextFormattedAddress()} ret";
+			
 			string locals = GenerateLocals();
 			
 			return GenerateMainMethod(locals + ilCode);
@@ -26,14 +32,17 @@ namespace OCRRFcompiler.IlGeneration
 		public string GenerateLocals()
 		{
 			string returnValue = $".locals init (\n";
-			int i = 0;
-			foreach (ExpressionVariable v in Tree.AllVariables)
+			// skip final one so it doesn't have a comma
+			for (int i = 0; i < Tree.AllVariables.Count - 1; i++)
 			{
-				returnValue += $"[{i}] {v.ExpressionType.Name} {v.ValueName}\n";
-				i++;
+				ExpressionVariable v = Tree.AllVariables[i];
+				returnValue += $"[{i}] {TypeNames[v.ExpressionType]} {v.ValueName},\n";
 			}
 
-			returnValue += ")";
+			ExpressionVariable finalVariable = Tree.AllVariables[Tree.AllVariables.Count - 1];
+			returnValue += $"[{Tree.AllVariables.Count - 1}] {TypeNames[finalVariable.ExpressionType]} {finalVariable.ValueName}\n";
+			
+			returnValue += ")\n";
 			
 			return returnValue;
 		}
@@ -41,40 +50,16 @@ namespace OCRRFcompiler.IlGeneration
 		public string GenerateMainMethod(string _code)
 		{
 			return @"
-					.assembly extern System.Runtime
+					.assembly System.Runtime {}
+
+					.method private hidebysig static void Main(string[] args) cil managed
 					{
-					  .publickeytoken = (B0 3F 5F 7F 11 D5 0A 3A )
-					  .ver 5:0:0:0
-					}
-					.assembly extern System.Console
-					{
-					  .publickeytoken = (B0 3F 5F 7F 11 D5 0A 3A )                       
-					  .ver 5:0:0:0
-					}
-					.assembly _
-					{
-						.custom instance void [System.Private.CoreLib]System.Runtime.CompilerServices.CompilationRelaxationsAttribute::.ctor(int32) = (
-					        01 00 08 00 00 00 00 00
-					    )
-					}
-					.class private auto ansi abstract sealed beforefieldinit '<Program>$'
-						extends [System.Private.CoreLib]System.Object
-					{
-						.custom instance void [System.Private.CoreLib]System.Runtime.CompilerServices.CompilerGeneratedAttribute::.ctor() = (
-						01 00 00 00
-						)
-						
-						.method private hidebysig static 
-							void '<Main>$' (
-								string[] args
-							) cil managed 
 						{
 							.maxstack 3
 							.entrypoint
 							" + _code + @"
 						} // end of method '<Program>$'::'<Main>$'
-
-					} // end of class <Program>$
+					}
 					";
 		}
 	}
