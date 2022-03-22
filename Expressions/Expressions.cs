@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using OCRRFcompiler.IlGeneration;
 using OCRRFcompiler.Scanning;
@@ -92,9 +92,14 @@ namespace OCRRFcompiler.Expressions
 	{
 		public string ValueName;
 		public int VariableIndex;
+    public bool IsArg = false;
 		public override string GenerateIl(IlManager _manager)
 		{
-			return $"{_manager.NextFormattedAddress()} ldloc.{VariableIndex}\n";
+			if (IsArg)
+				return $"{_manager.NextFormattedAddress()} ldarg.{VariableIndex}";
+
+			// else
+			return $"{_manager.NextFormattedAddress()} ldloc.{VariableIndex}";
 		}
 	}
 
