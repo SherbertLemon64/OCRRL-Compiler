@@ -43,5 +43,15 @@ namespace OCRRFcompiler.Testing
 				endwhile";
 			scanner.Scan(new StringReader(whileLoop));
 		}
+
+		[Test]
+		public void TestBasicFuncs()
+		{
+			string basicFuncs =
+				@"
+				age = input(""Enter your age: "")
+				print(""You are "" + age + "" years old"")";
+			scanner.Scan(new StringReader(basicFuncs));
+		}
 	}
 }
