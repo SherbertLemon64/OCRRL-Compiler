@@ -255,7 +255,7 @@ namespace OCRRFcompiler.Scanning
 
 		public void ReadTextBlock(TextReader _reader, char _currenVal)
 		{
-			string _fullValue = ReadUntilChars(_reader, _currenVal, new[] {' ', '=', '!', '<', '>', '\n', '\r'});
+			string _fullValue = ReadUntilChars(_reader, _currenVal, new[] {' ', '=', '!', '<', '>', '\n', '\r','"','(',')'});
 			// check if or which value it is in the identifiers
 
 			if (IdentifiersMap.TryGetValue(_fullValue, out Type _type))
