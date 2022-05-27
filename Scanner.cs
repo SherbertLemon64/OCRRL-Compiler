@@ -86,6 +86,70 @@ namespace OCRRFcompiler.Scanning
 							Tokens.Add(bracket);
 							break;
 						}
+						case '+':
+						{
+							if (_reader.Peek() == '=')
+							{
+								AssignmentToken assignmentToken = new AssignmentToken
+									{ AssignmentType = Assignments.AddEqual };
+								Tokens.Add(assignmentToken);
+							}
+							else
+							{
+								ExpressionComparason comparason = new ExpressionComparason(Operators.PLUS);
+								Tokens.Add(comparason);
+							}
+							
+							break;
+						}
+						case '-':
+						{
+							if (_reader.Peek() == '=')
+							{
+								AssignmentToken assignmentToken = new AssignmentToken
+									{ AssignmentType = Assignments.SubtractEqual };
+								Tokens.Add(assignmentToken);
+							}
+							else
+							{
+								ExpressionComparason comparason = new ExpressionComparason(Operators.SUBTRACT);
+								Tokens.Add(comparason);
+							}
+							
+							break;
+						}
+						case '*':
+						{
+							if (_reader.Peek() == '=')
+							{
+								AssignmentToken assignmentToken = new AssignmentToken
+									{ AssignmentType = Assignments.MultiplyEqual };
+								Tokens.Add(assignmentToken);
+							}
+							else
+							{
+								ExpressionComparason comparason = new ExpressionComparason(Operators.MULTIPLY);
+								Tokens.Add(comparason);
+							}
+							
+							break;
+						}
+						case '/':
+						{
+							if (_reader.Peek() == '=')
+							{
+								AssignmentToken assignmentToken = new AssignmentToken
+									{ AssignmentType = Assignments.DivEqual };
+								Tokens.Add(assignmentToken);
+							}
+							else
+							{
+								ExpressionComparason comparason = new ExpressionComparason(Operators.DIVISION);
+								Tokens.Add(comparason);
+							}
+							
+							break;
+						}
 					}
 				}
 			}
@@ -313,7 +377,7 @@ namespace OCRRFcompiler.Scanning
 		Equal,
 		AddEqual,
 		SubtractEqual,
-		TimesEqual,
+		MultiplyEqual,
 		DivEqual
 	}
 

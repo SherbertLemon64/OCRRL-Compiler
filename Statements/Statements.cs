@@ -1,4 +1,5 @@
-﻿using OCRRFcompiler.Expressions;
+﻿using System;
+ using OCRRFcompiler.Expressions;
 using OCRRFcompiler.IlGeneration;
 using OCRRFcompiler.Parsing;
 using OCRRFcompiler.Scanning;
@@ -9,11 +10,34 @@ namespace OCRRFcompiler.Statements
 	{
 		public abstract string GenerateIl(IlManager _manager);
 	}
-	
-	public class ConditionalStatement : Statement
+
+  public abstract class SubScopeStatement : Statement 
+  {
+		public Scope SubScope;
+  }
+
+  public class FunctionDefinitionStatement : SubScopeStatement 
+  {
+	  public override string GenerateIl(IlManager _manager)
+	  {
+		  throw new NotImplementedException();
+	  }
+  }
+
+  public class FunctionStatement : SubScopeStatement 
+  {
+	  public Expression[] Params;
+	  public FunctionDefinitionStatement Function;
+    
+	  public override string GenerateIl(IlManager _manager) 
+	  { 
+		  throw new NotImplementedException();
+	  }
+  }
+  
+	public class ConditionalStatement : SubScopeStatement
 	{
 		public Expression Check;
-		public Scope ConditionalScope;
 		public override string GenerateIl(IlManager _manager)
 		{
 			string returnValue = "";
@@ -21,7 +45,7 @@ namespace OCRRFcompiler.Statements
 			returnValue += Check.GenerateIl(_manager);
 			string branchStatement = $"{_manager.NextFormattedAddress()} brfalse.s "; // this needs an index at the end to tell it where to branch to
 			// Get the subscope Il
-			string subscope = ConditionalScope.GenerateIl(_manager);
+			string subscope = SubScope.GenerateIl(_manager);
 			// tell the branch statement to branch to the address one after the end of the subscope
 			branchStatement += $"{IlManager.FormatAddress(_manager.address + 1)}";
 			
@@ -68,7 +92,7 @@ namespace OCRRFcompiler.Statements
 			                     $"{_manager.NextFormattedAddress()} br.s ";
 			startAddress = _manager.address;
 
-			string scopeIl = $"{ConditionalScope.GenerateIl(_manager)}";
+			string scopeIl = $"{SubScope.GenerateIl(_manager)}";
 			
 			string incrementIl = $"{IncrementAssignment.GenerateIl(_manager)}";
 			// sets the break to the start of the comparason
@@ -98,13 +122,13 @@ namespace OCRRFcompiler.Statements
 		{
 			string branchToCondition = $"{_manager.NextFormattedAddress()} br.s ";
 
-			long subscopeStart = _manager.address + 1;
+			long subscopeStart = _manager.address;
 			
-			string subscope = ConditionalScope.GenerateIl(_manager);
-			branchToCondition += $"{IlManager.FormatAddress(_manager.address + 1)}";
+			string subscope = SubScope.GenerateIl(_manager);
+			branchToCondition += $"{IlManager.FormatAddress(_manager.address)}";
 
 			string condidition = Check.GenerateIl(_manager) +
-			                     $"{_manager.NextFormattedAddress()} blt.s {IlManager.FormatAddress(subscopeStart)}";
+			                     $"{_manager.NextFormattedAddress()} brtrue.s {IlManager.FormatAddress(subscopeStart)}";
 
 			return branchToCondition + subscope + condidition;
 		}

@@ -18,7 +18,7 @@ namespace OCRRFcompiler.Testing
 		{
 			parser.ParseLocation(Directory.GetCurrentDirectory() + @"\Test.rl");
 			
-			string il = generator.GenerateIl(parser.Tree);
+			string il = generator.GenerateIl(ref parser.Tree);
 			Assert.Pass();
 		}
 
@@ -34,7 +34,7 @@ namespace OCRRFcompiler.Testing
 				next x";
 			parser.Parse(forLoop);
 			
-			string il = generator.GenerateIl(parser.Tree);
+			string il = generator.GenerateIl(ref parser.Tree);
 		}
 
 		[Test]
@@ -48,7 +48,7 @@ namespace OCRRFcompiler.Testing
 				endwhile";
 			parser.Parse(whileLoop);
 
-			string il = generator.GenerateIl(parser.Tree);
+			string il = generator.GenerateIl(ref parser.Tree);
 		}
 	}
 }

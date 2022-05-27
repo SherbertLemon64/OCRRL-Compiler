@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using OCRRFcompiler.IlGeneration;
 using OCRRFcompiler.Scanning;
@@ -92,7 +92,7 @@ namespace OCRRFcompiler.Expressions
 	{
 		public string ValueName;
 		public int VariableIndex;
-    public bool IsArg = false;
+		public bool IsArg = false;
 		public override string GenerateIl(IlManager _manager)
 		{
 			if (IsArg)

@@ -24,9 +24,9 @@ namespace OCRRFcompiler.Parsing
 			CurrentScope.Statements.Add(_toAdd);
 			if (_toAdd is ConditionalStatement conditionalStatement)
 			{
-				conditionalStatement.ConditionalScope = new Scope(CurrentScope);
+				conditionalStatement.SubScope = new Scope(CurrentScope);
 				CurrentScope.SubScopes.Add(conditionalStatement);
-				CurrentScope = conditionalStatement.ConditionalScope;
+				CurrentScope = conditionalStatement.SubScope;
 			}
 		}
 
@@ -65,7 +65,7 @@ namespace OCRRFcompiler.Parsing
 		public Scope Parent;
 		public List<Statement> Statements = new List<Statement>();
 		public HashSet<ExpressionVariable> Variables = new HashSet<ExpressionVariable>();
-		public List<ConditionalStatement> SubScopes = new List<ConditionalStatement>();
+		public List<SubScopeStatement> SubScopes = new List<SubScopeStatement>();
 
 		public HashSet<ExpressionVariable> UpperScopeVariables;
 		public string GenerateIl(IlManager _manager)
@@ -84,7 +84,7 @@ namespace OCRRFcompiler.Parsing
 			Variables.Add(_variable);
 			foreach (ConditionalStatement lowerScope in SubScopes)
 			{
-				lowerScope.ConditionalScope.UpperScopeVariables.Add(_variable);
+				lowerScope.SubScope.UpperScopeVariables.Add(_variable);
 			}
 		}
 		

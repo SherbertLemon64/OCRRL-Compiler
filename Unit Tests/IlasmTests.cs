@@ -20,7 +20,7 @@ namespace OCRRFcompiler.Testing
 		{
 			parser.ParseLocation(Directory.GetCurrentDirectory() + @"\Test.rl");
 			
-			string il = generator.GenerateIl(parser.Tree);
+			string il = generator.GenerateIl(ref parser.Tree);
 			
 			File.WriteAllText("Test.il", il);
 
@@ -33,13 +33,12 @@ namespace OCRRFcompiler.Testing
 			string forLoop = 
 				@"
 				y = 0
-				for x=0 to 100 step 2
-					y = 2
-					z = 10
+				for x=0 to 10 step 1
+					y = y + 1
 				next x";
 			parser.Parse(forLoop);
 			
-			string il = generator.GenerateIl(parser.Tree);
+			string il = generator.GenerateIl(ref parser.Tree);
 			
 			File.WriteAllText("ForLoop.il", il);
 
@@ -57,7 +56,7 @@ namespace OCRRFcompiler.Testing
 				endwhile";
 			parser.Parse(whileLoop);
 
-			string il = generator.GenerateIl(parser.Tree);
+			string il = generator.GenerateIl(ref parser.Tree);
 			
 			File.WriteAllText("WhileLoop.il", il);
 

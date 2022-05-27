@@ -16,17 +16,26 @@ namespace OCRRFcompiler.IlGeneration
 			{ typeof(int), "int32" },
 		};
 
-		public string GenerateIl(SyntaxTree _tree)
+		public string GenerateIl(ref SyntaxTree _tree)
 		{
 			Tree = _tree;
 			IlManager manager = new IlManager();
-
+      
 			string ilCode = _tree.GlobalScope.GenerateIl(manager);
 			ilCode += $"{manager.NextFormattedAddress()} ret";
 			
 			string locals = GenerateLocals();
-			
-			return GenerateMainMethod(locals + ilCode);
+			string main = GenerateMainMethod(locals + ilCode);
+			foreach (SubScopeStatement scope in _tree.GlobalScope.SubScopes) 
+			{
+				if (scope is FunctionDefinitionStatement funciton) 
+				{
+					main += funciton.GenerateIl(manager);
+					throw new Exception("Got to the unreachable code");
+				}
+			}
+      
+			return main;
 		}
 
 		public string GenerateLocals()

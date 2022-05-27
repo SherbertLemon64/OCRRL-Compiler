@@ -21,7 +21,7 @@ namespace OCRRFcompiler.Tokens
 			WhileLoopStatement whileLoopStatement = new WhileLoopStatement();
 			ConditionalStatement conditionalStatement = _parser.ParseConditionalStatement();
 			whileLoopStatement.Check = conditionalStatement.Check;
-			whileLoopStatement.ConditionalScope = conditionalStatement.ConditionalScope;
+			whileLoopStatement.SubScope = conditionalStatement.SubScope;
 			
 			return whileLoopStatement;
 		}
@@ -55,5 +55,10 @@ namespace OCRRFcompiler.Tokens
 	public class NullToken : Identifier
 	{
 		public override Statement ParseStatement(Parser _parser) => null;
+	}
+
+	public class FunctionToken : Identifier 
+	{
+		public override Statement ParseStatement(Parser _parser) => _parser.ParseFunctionDefinitionStatement();
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using OCRRFcompiler.Errors;
@@ -148,6 +148,12 @@ namespace OCRRFcompiler.Parsing
 		
 		
 		// statements
+		public FunctionDefinitionStatement ParseFunctionDefinitionStatement()
+		{
+			FunctionDefinitionStatement function = new FunctionDefinitionStatement();
+			return function;
+		}
+    
 		public ConditionalStatement ParseConditionalStatement()
 		{
 			ConditionalStatement statement = new ConditionalStatement {Check = ParseExpression()};
@@ -170,8 +176,8 @@ namespace OCRRFcompiler.Parsing
 			{
 				throw new UnexpectedTokenException(0, typeof(Expression), assignment.GetType());
 			}
-
-			_var.ExpressionType = returnValue.Assignment.ExpressionType;
+			if (_var.ExpressionType is null)
+				_var.ExpressionType = returnValue.Assignment.ExpressionType;
 			
 			Tree.AddVariable(ref returnValue.Variable);
 			
