@@ -1,5 +1,6 @@
 ﻿using System;
 using OCRRFcompiler.Errors;
+using OCRRFcompiler.Tokens;
 
 namespace OCRRFcompiler.Parsing
 {
@@ -26,8 +27,13 @@ namespace OCRRFcompiler.Parsing
 		
 		public T Read()
 		{
-			T val = values[index];
-			index++;
+			T val;
+			do
+			{
+				val = values[index];
+				index++;
+			} while (val is NullToken);
+
 			return val;
 		}
 

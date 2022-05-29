@@ -11,6 +11,16 @@ namespace OCRRFcompiler.Statements
 		public abstract string GenerateIl(IlManager _manager);
 	}
 
+	public class FunctionCallStatement : Statement
+	{
+		public FunctionCallExpression function;
+
+		public override string GenerateIl(IlManager _manager)
+		{
+			throw new NotImplementedException();
+		}
+	}
+	
   public abstract class SubScopeStatement : Statement 
   {
 		public Scope SubScope;

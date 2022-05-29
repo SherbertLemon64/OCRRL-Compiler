@@ -50,7 +50,8 @@ namespace OCRRFcompiler.Testing
 			string basicFuncs =
 				@"
 				age = input(""Enter your age: "")
-				print(""You are "" + age + "" years old"")";
+				print(""You are "" + age + "" years old"")
+				print(""Here is a random number"" + random(0, 10))";
 			scanner.Scan(new StringReader(basicFuncs));
 		}
 	}

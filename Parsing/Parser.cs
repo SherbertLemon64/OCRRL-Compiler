@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using OCRRFcompiler.Errors;
@@ -46,10 +46,19 @@ namespace OCRRFcompiler.Parsing
 		public Expression ParseExpression()
 		{
 			Expression _returnExpr;
-			
-			if (TokenReader.Seek() is ExpressionComparason)
+			object seek = TokenReader.Seek();
+
+			if (seek is ExpressionComparason)
 			{
 				_returnExpr = ParseBinaryExpression();
+			} else if (seek is ParenthesisToken seekToken)
+			{
+				if (seekToken.Open)
+					_returnExpr = ParseFunctionCallExpression();
+				else
+				{
+					_returnExpr = ParseSingleExpression();
+				}
 			}
 			else
 			{
@@ -59,14 +68,48 @@ namespace OCRRFcompiler.Parsing
 			return _returnExpr;
 		}
 
+		private Expression ParseFunctionCallExpression()
+		{
+			FunctionCallExpression call = new FunctionCallExpression();
+			List<Expression> parameters = new List<Expression>();
+			ExpressionVariable function = (ExpressionVariable) TokenReader.ReadValueAsType(typeof(ExpressionVariable));
+			
+			object token = TokenReader.Seek();
+			while (token is Expression ExpToken)
+			{
+				TokenReader.Read();
+				parameters.Add(ParseExpression());
+				
+				if (TokenReader.SeekCurrent() is not Comma)
+					break;
+				
+				token = TokenReader.Seek();
+			}
+			
+			TokenReader.Read(); // swallow the parenthesis 
+			
+			call.FunctionName = function.ValueName;
+			call.Params = parameters.ToArray();
+
+			return call;
+		}
+		
 		private Expression ParseSingleExpression()
 		{
-			Expression returnValue = (Expression) TokenReader.ReadValueAsType(typeof(Expression));
-
-			if (returnValue is ExpressionVariable variable)
+			Expression returnValue;
+			
+			if (TokenReader.Seek() is ParenthesisToken { Open: true })
+			{
+				returnValue = ParseFunctionCallExpression();
+			} else if (TokenReader.SeekCurrent() is ExpressionVariable variable)
 			{
 				Tree.AddVariable(ref variable);
+				TokenReader.Read();
 				return variable;
+			}
+			else
+			{
+				returnValue = (Expression) TokenReader.ReadValueAsType(typeof(Expression));
 			}
 
 			return returnValue;
@@ -81,6 +124,7 @@ namespace OCRRFcompiler.Parsing
 			while (true)
 			{
 				object _peek;
+				int currentPoint = TokenReader.index;
 				try
 				{
 					_peek = ParseExpression();
@@ -91,6 +135,7 @@ namespace OCRRFcompiler.Parsing
 				}
 				catch (UnexpectedTokenException)
 				{
+					TokenReader.index = currentPoint;
 					break;
 				}
 				
@@ -160,8 +205,10 @@ namespace OCRRFcompiler.Parsing
 			return statement;
 		}
 
-		private AssignmentStatement ParseAssignmentStatement(ExpressionVariable _var)
+		private AssignmentStatement ParseAssignmentStatement()
 		{
+			ExpressionVariable _var = (ExpressionVariable)TokenReader.ReadValueAsType(typeof(ExpressionVariable));
+			
 			Tree.AddVariable(ref _var);
 			AssignmentStatement returnValue = new AssignmentStatement();
 			
@@ -187,7 +234,7 @@ namespace OCRRFcompiler.Parsing
 		public ForLoopStatement ParseForLoop()
 		{
 			ForLoopStatement returnValue = new ForLoopStatement();
-			AssignmentStatement assignmentStatement = ParseAssignmentStatement((ExpressionVariable) TokenReader.ReadValueAsType(typeof(ExpressionVariable)));
+			AssignmentStatement assignmentStatement = ParseAssignmentStatement();
 
 			returnValue.Assignment = assignmentStatement;
 			
@@ -229,10 +276,17 @@ namespace OCRRFcompiler.Parsing
 		{
 			Tree.EndScope();
 		}
+
+		public Statement ParseFunctionCallStatement()
+		{
+			FunctionCallStatement statement = new FunctionCallStatement();
+			statement.function = (FunctionCallExpression)ParseFunctionCallExpression();
+			return statement;
+		}
 		
 		private Statement ParseNextStatement()
 		{
-			object currentToken = TokenReader.Read();
+			object currentToken = TokenReader.Seek();
 			
 			Statement _returnStatement;
 
@@ -242,7 +296,14 @@ namespace OCRRFcompiler.Parsing
 			}
 			else if (currentToken is ExpressionVariable var)
 			{
-				_returnStatement = ParseAssignmentStatement(var);
+				if (TokenReader.Seek(2) is ParenthesisToken)
+				{
+					_returnStatement = ParseFunctionCallStatement();
+				}
+				else
+				{
+					_returnStatement = ParseAssignmentStatement();
+				}
 			}
 			else
 			{

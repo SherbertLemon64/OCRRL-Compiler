@@ -39,5 +39,16 @@ namespace OCRRFcompiler.Testing
 				endwhile";
 			parser.Parse(whileLoop);
 		}
+		
+		[Test]
+		public void TestBasicFuncs()
+		{
+			string basicFuncs =
+				@"
+				age = input(""Enter your age: "")
+				print(""You are "" + age + "" years old"")
+				print(""Here is a random number"" + random(0, 10))";
+			parser.Parse(basicFuncs);
+		}
 	}
 }

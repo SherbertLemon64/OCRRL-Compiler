@@ -15,6 +15,17 @@ namespace OCRRFcompiler.Expressions
 		}
 	}
 
+	public class FunctionCallExpression : Expression
+	{
+		public string FunctionName;
+		public Expression[] Params;
+
+		public override string GenerateIl(IlManager _manager)
+		{
+			throw new NotImplementedException();
+		}
+	}
+	
 	public class ExpressionComparason : Expression
 	{
 		public Operators Operator;
