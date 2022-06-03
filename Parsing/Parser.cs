@@ -127,11 +127,7 @@ namespace OCRRFcompiler.Parsing
 				int currentPoint = TokenReader.index;
 				try
 				{
-					_peek = ParseExpression();
-					if (_peek is not ExpressionComparason)
-					{
-						break;
-					}
+					_peek = TokenReader.ReadValueAsType(typeof(ExpressionComparason));
 				}
 				catch (UnexpectedTokenException)
 				{
@@ -201,10 +197,21 @@ namespace OCRRFcompiler.Parsing
     
 		public ConditionalStatement ParseConditionalStatement()
 		{
+			TokenReader.Read(); // swallow identifier
 			ConditionalStatement statement = new ConditionalStatement {Check = ParseExpression()};
 			return statement;
 		}
 
+		public WhileLoopStatement ParseWhileLoop()
+		{
+			WhileLoopStatement whileLoopStatement = new WhileLoopStatement();
+			ConditionalStatement conditionalStatement = ParseConditionalStatement();
+			whileLoopStatement.Check = conditionalStatement.Check;
+			whileLoopStatement.SubScope = conditionalStatement.SubScope;
+			
+			return whileLoopStatement;
+		}
+		
 		private AssignmentStatement ParseAssignmentStatement()
 		{
 			ExpressionVariable _var = (ExpressionVariable)TokenReader.ReadValueAsType(typeof(ExpressionVariable));
@@ -231,15 +238,27 @@ namespace OCRRFcompiler.Parsing
 			return returnValue;
 		}
 
+		public void Swallow()
+		{
+			TokenReader.Read();
+		}
+		
+		public Statement ParseSwallowNext()
+		{
+			TokenReader.Read();
+			// swallow variable after next statement
+			ParseExpression();
+			return null;
+		}
+		
 		public ForLoopStatement ParseForLoop()
 		{
 			ForLoopStatement returnValue = new ForLoopStatement();
+			TokenReader.Read(); // swallow for statement
 			AssignmentStatement assignmentStatement = ParseAssignmentStatement();
 
 			returnValue.Assignment = assignmentStatement;
-			
-			TokenReader.Read(); // chuck the to
-			
+
 			ExpressionLiteral<int> max = (ExpressionLiteral<int>) ParseExpression();
 
 			returnValue.Check = new BinaryExpression()
@@ -248,8 +267,6 @@ namespace OCRRFcompiler.Parsing
 				RightValue = max,
 				Comparason = new ExpressionComparason(Operators.LessThan)
 			};
-
-			TokenReader.Read(); // chuck the step
 
 			ExpressionLiteral<int> step = (ExpressionLiteral<int>) ParseExpression();
 
